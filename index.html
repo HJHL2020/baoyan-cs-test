@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>根据你的bg定位你的保研院校冲稳保 · 计算机大类</title>
+<style>
+:root{
+  --bg:#FAF3E7; --card:#FFFDF8; --ink:#1E3A2C; --ink2:#4A6355;
+  --green:#2F6B4F; --green-dk:#24503B; --pink:#F2C7CF; --pink-dk:#B4657A;
+  --line:#E8DCC6; --gold:#C9963F; --shadow:0 8px 24px rgba(80,60,30,.10);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;line-height:1.65;overflow-x:hidden}
+#app{max-width:480px;margin:0 auto;min-height:100vh;position:relative;background:var(--bg)}
+.screen{display:none;min-height:100vh;padding:20px 18px 40px}
+.screen.on{display:block}
+h1{font-size:24px;line-height:1.4;letter-spacing:.5px}
+h2{font-size:19px;line-height:1.5}
+h3{font-size:16px}
+p{font-size:14.5px}
+.small{font-size:12px;color:var(--ink2)}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.tag.pink{background:var(--pink);color:var(--pink-dk);transform:rotate(-2deg)}
+.tag.green{background:#DFEDE2;color:var(--green-dk)}
+.tag.gold{background:#F6E8C8;color:#8A6410}
+.card{background:var(--card);border-radius:22px;padding:18px 16px;box-shadow:var(--shadow);margin-bottom:14px;border:1px solid #F1E7D2}
+.btn{display:block;width:100%;border:none;border-radius:16px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s}
+.btn:active{transform:scale(.96)}
+.btn.main{background:var(--green);color:#fff;box-shadow:0 6px 0 var(--green-dk)}
+.btn.main:disabled{background:#C8C2B4;box-shadow:none;color:#F3EFE6;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--green);border:2px solid var(--green)}
+.btn.small-b{display:inline-block;width:auto;padding:7px 14px;font-size:13px;border-radius:12px}
+/* 首页 */
+#home .logo{font-size:40px;text-align:center;margin:26px 0 6px}
+#home h1{text-align:center;margin-bottom:10px}
+#home .intro{background:var(--card);border-radius:22px;padding:18px 16px;box-shadow:var(--shadow);border:1px solid #F1E7D2;margin-bottom:14px}
+#home ul{margin:8px 0 0 1.2em}
+#home li{font-size:13.5px;margin-bottom:4px;color:var(--ink)}
+.meta-row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+/* 答题 */
+.qtop{position:sticky;top:0;z-index:9;background:linear-gradient(var(--bg) 82%,transparent);padding:10px 2px 14px;margin:-20px -2px 6px}
+.qcount{display:flex;justify-content:space-between;align-items:baseline}
+.pbar{height:4px;background:var(--line);border-radius:99px;margin-top:8px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .3s}
+.qstage{position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;transform:translateX(110%);transition:transform .38s cubic-bezier(.22,.9,.32,1.15);opacity:0;pointer-events:none;background:var(--bg);padding-top:6px}
+.slide.cur{transform:translateX(0);opacity:1;pointer-events:auto;position:relative}
+.slide.left{transform:translateX(-28%);opacity:0}
+.qtitle{margin-bottom:4px}
+.qnote{font-size:12.5px;color:#8A6410;background:#F6E8C8;border-radius:10px;padding:6px 10px;margin:8px 0 4px;display:inline-block}
+.opts{margin-top:14px}
+.opt{display:block;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:14px;padding:11px 13px;font-size:14.5px;font-family:inherit;color:var(--ink);cursor:pointer;margin-bottom:9px;transition:all .15s;line-height:1.5}
+.opt.sel{border-color:var(--green);background:#EAF4EC;font-weight:600;box-shadow:0 3px 0 rgba(47,107,79,.25)}
+.opt:active{transform:scale(.985)}
+.subq{margin-top:14px;padding-top:10px;border-top:1px dashed var(--line)}
+.subq .st{font-size:13.5px;font-weight:700;margin-bottom:8px}
+.mini-row{display:flex;gap:8px;flex-wrap:wrap}
+.mini{flex:1;min-width:74px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 6px;font-size:13px;font-family:inherit;cursor:pointer;color:var(--ink);transition:all .15s}
+.mini.sel{border-color:var(--green);background:#EAF4EC;font-weight:700}
+.qnav{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:0;padding:10px 0 16px;background:linear-gradient(transparent,var(--bg) 40%)}
+.qnav .btn{flex:1}
+.aids{display:flex;gap:8px;margin-top:6px}
+.aids button{flex:1;background:none;border:1.5px dashed #C9BBA0;color:var(--ink2);border-radius:12px;padding:8px;font-size:12.5px;font-family:inherit;cursor:pointer}
+.aids button.sel{background:#F6E8C8;border-color:var(--gold);color:#8A6410;font-weight:700}
+/* 弹层 */
+.modal{position:fixed;inset:0;background:rgba(30,58,44,.45);display:none;align-items:center;justify-content:center;z-index:99;padding:24px}
+.modal.on{display:flex}
+.modal .box{background:var(--card);border-radius:24px;padding:26px 20px;max-width:360px;width:100%;text-align:center;animation:pop .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+/* 计算动效 */
+#calc{position:fixed;inset:0;background:var(--bg);z-index:120;display:none;align-items:center;justify-content:center;flex-direction:column}
+#calc.on{display:flex}
+.spinner{width:56px;height:56px;border-radius:50%;border:6px solid var(--line);border-top-color:var(--green);animation:spin 1s linear infinite;margin-bottom:22px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#calcLine{font-size:15px;font-weight:600;color:var(--ink);transition:opacity .2s}
+/* 结果 */
+#result h2{margin-bottom:6px}
+.banner{border-radius:16px;padding:12px 14px;font-size:13.5px;margin-bottom:12px;line-height:1.6}
+.banner.warn{background:#FDEBD3;color:#8A5200;border:1.5px solid #EFC98E}
+.banner.adj{background:#EAF4EC;color:var(--green-dk);border:1.5px solid #CBE2D2}
+.banner.pinkb{background:#FBE9ED;color:var(--pink-dk);border:1.5px solid #F2C7CF}
+.badge{width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;color:#fff;margin:0 auto;box-shadow:0 6px 0 rgba(0,0,0,.12)}
+.badge.S{background:#2F6B4F}.badge.A{background:#4A8A67}.badge.B{background:#C9963F}.badge.C{background:#D97B4F}.badge.D{background:#9A8FB8}
+.tier-h{display:flex;align-items:center;gap:10px;margin:20px 0 10px}
+.tier-h .tt{font-size:18px;font-weight:800}
+.tier-h .line{flex:1;height:1.5px;background:var(--line)}
+.scard{background:var(--card);border-radius:20px;padding:15px 14px;box-shadow:var(--shadow);margin-bottom:12px;border:1px solid #F1E7D2}
+.scard .sname{font-size:15.5px;font-weight:800;line-height:1.5}
+.scard .smajor{font-size:12.5px;color:var(--ink2);margin:2px 0 8px}
+.srow{font-size:13.5px;margin-top:7px;line-height:1.7}
+.srow b{color:var(--green-dk)}
+.srow .lbl{display:inline-block;background:var(--pink);color:var(--pink-dk);border-radius:8px;padding:1px 8px;font-size:12px;font-weight:700;margin-right:6px;transform:rotate(-1deg)}
+.scard .dep{margin-top:9px;padding-top:7px;border-top:1px dashed var(--line);font-size:11px;color:#9A8F7C}
+.scard.locked{filter:grayscale(.3);background:#F4EDE0;border-style:dashed}
+.scard.locked .blur{filter:blur(5px);user-select:none}
+.radar-wrap{display:flex;flex-direction:column;align-items:center}
+.radar-tip{font-size:12.5px;color:var(--green-dk);background:#EAF4EC;border-radius:10px;padding:7px 11px;margin-top:8px;min-height:38px;text-align:center;max-width:330px}
+.axis{cursor:pointer}
+li.tip{font-size:13.5px;margin-bottom:7px}
+ul.tips{margin:6px 0 2px 1.1em}
+.cite{color:var(--green-dk);font-weight:600}
+.unlock{background:linear-gradient(145deg,#FFF7EA,#FBEAD8);border:1.5px dashed var(--gold)}
+.price{background:#fff;border-radius:16px;padding:12px 14px;margin-top:10px;border:1.5px solid var(--line)}
+.price b{color:#8A5200}
+.foot{margin-top:22px;text-align:center}
+.king{background:var(--card);border:1.5px solid var(--pink);border-radius:18px;padding:12px;text-align:center;font-size:15px;font-weight:800;color:var(--pink-dk);margin:14px 0}
+.code-input{width:100%;padding:14px;border-radius:14px;border:2px solid var(--line);font-size:17px;font-family:inherit;letter-spacing:2px;text-transform:uppercase;background:#fff;color:var(--ink);outline:none}
+.code-input:focus{border-color:var(--green)}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- 激活门禁 -->
+<section id="gate" class="screen">
+  <div class="logo">🔐</div>
+  <h1 style="text-align:center">激活测试</h1>
+  <div class="card" style="margin-top:16px">
+    <p style="font-weight:700">本测试为付费内容，凭激活码进入。</p>
+    <p class="small" style="margin-top:6px">激活码在你购买后提供（格式形如 <b>BY-XXXX-XXXX</b>）。一次激活、本机长期有效；换手机或电脑需要重新输入。激活码每台设备用一次即可，链接本身可以随便点，没有码只能看到这一页。</p>
+    <input id="codeInput" class="code-input" placeholder="BY-AB2K-9XQW" autocomplete="off" style="margin-top:12px">
+    <button class="btn main" id="codeBtn" style="margin-top:12px">激活并进入 →</button>
+    <p class="small" id="codeMsg" style="color:var(--pink-dk);margin-top:10px;min-height:18px"></p>
+  </div>
+  <p class="small" style="text-align:center;margin-top:16px">原创趣味设定，仅供娱乐与自我观察</p>
+</section>
+
+<!-- 首页 -->
+<section id="home" class="screen on">
+  <div class="logo">🎯</div>
+  <h1>根据你的bg<br>定位你的保研院校<br>冲稳保</h1>
+  <div style="text-align:center;margin-bottom:16px"><span class="tag pink">计算机大类专属</span> <span class="tag green">不投喂排名 只输出缺口</span></div>
+  <div class="intro">
+    <p><b>18 道题 · 1 份定位结果</b></p>
+    <p class="small" style="margin-top:6px">覆盖：计算机 / 软件 / 电子 / 通信 / 自动化 / 机械 / 能动 / 生医工 / 其他工科</p>
+    <ul>
+      <li>六维雷达，短板一眼可见</li>
+      <li>每所院校带三句话：为什么给你 / 差在哪 / 今年怎么补</li>
+      <li>严格分开「已不可改变量」和「可改变量」，只对能改的给最短路径</li>
+      <li>冲、稳、保三档，全部带学校＋学院＋专业</li>
+    </ul>
+  </div>
+  <div class="meta-row">
+    <span class="tag green">18 题 ≈ 5 分钟</span>
+    <span class="tag gold">结果页：冲 3–5 · 稳 3 · 保 3</span>
+    <span class="tag green">不登录 · 不收集信息</span>
+  </div>
+  <button class="btn main" id="startBtn">开始测试 →</button>
+  <p class="small" style="text-align:center;margin-top:14px">原创趣味设定，仅供娱乐与自我观察<br>院校信息为公开口径整理，投递以当年招生简章为准</p>
+</section>
+
+<!-- 答题 -->
+<section id="quiz" class="screen">
+  <div class="qtop">
+    <div class="qcount"><b id="qNum">第 1 / 18 题</b><span class="small" id="qGroup">第一组 · 基础信息与资格</span></div>
+    <div class="pbar"><i id="pfill" style="width:5%"></i></div>
+  </div>
+  <div class="qstage" id="qstage"></div>
+</section>
+
+<!-- 计算动效 -->
+<div id="calc"><div class="spinner"></div><div id="calcLine">正在读你的六维背景</div></div>
+
+<!-- 结果 -->
+<section id="result" class="screen"></section>
+
+<!-- 过渡弹层 -->
+<div class="modal" id="modal"><div class="box">
+  <div style="font-size:34px" id="mEmoji">Checkpoint</div>
+  <h2 id="mTitle" style="margin:8px 0 6px"></h2>
+  <p class="small" id="mSub"></p>
+  <button class="btn main" id="mOk" style="margin-top:16px">继续 →</button>
+</div></div>
+
+</div>
+
+<script>
+"use strict";
+/* ════════════════════════════════════════════════════════════
+   数据区一 · 18 道题（改题目/选项文案只动这里）
+   o: [键, 文案, 计分/映射]
+════════════════════════════════════════════════════════════ */
+const GROUPS=["第一组 · 基础信息与资格","第二组 · 科研与论文","第三组 · 竞赛与其他筹码","第四组 · 偏好与阶段"];
+const QUESTIONS=[
+{id:1,g:0,t:"1. 本科院校层次",n:"",type:"s",o:[
+ ["a","985",95],["b","211",80],["c","双一流学科（非985/211）",72],["d","双非一本",52],["e","其他",35]],neu:60},
+{id:2,g:0,t:"2. 本科专业方向",n:"决定你的院校库与交叉方向映射",type:"s",o:[
+ ["cs","计算机","cs"],["se","软件","se"],["ee","电子","ee"],["comm","通信","comm"],["auto","自动化","auto"],["me","机械","me"],["pe","能动","pe"],["bme","生医工","bme"],["ot","其他工科","other"]]},
+{id:3,g:0,t:"3. 读研是否接受交叉学科方向",n:"接受交叉学科，可触达的院校层次通常更高一档",type:"s",o:[
+ ["acc","接受（可在交叉院系、新兴学院、AI＋医疗/能源/制造等方向投递）",100],["only","只接受本方向",30],["nth","没考虑过",55]],neu:55},
+{id:4,g:0,t:"4. 校内推免资格状态",n:"",type:"s",o:[
+ ["ok","已经确认稳拿",0],["edge","排名卡线在边缘",-8],["unknown","还没算过",-4],["no","明确没有资格","BRANCH"]],neu:-4},
+{id:5,g:0,t:"5. 专业排名百分位",n:"",type:"s",o:[
+ ["p5","前 5%",95],["p15","5–15%",85],["p30","15–30%",72],["p50","30–50%",58],["p70","50% 以后",40],["unk","不清楚",45]],neu:45},
+{id:6,g:0,t:"6. 核心专业课是否出现低分",n:"部分院校初筛会看核心课成绩，这一题会调整冲档数量",type:"s",o:[
+ ["none","无低分",0],["one","1 门在 60–70 分",-4],["two","2 门以上在 60–70 分",-10],["fail","有挂科且已补考通过",-12]],neu:0},
+{id:7,g:1,t:"7. 科研经历形式",n:"",type:"s",o:[
+ ["none","无",15],["dc","大创项目",45],["zh","组会打杂",30],["kt","参与导师课题",58],["dl","独立小课题",70]],neu:30},
+{id:8,g:1,t:"8. 论文与成果的层次",n:"CCF 指中国计算机学会推荐国际会议与期刊目录；选项按含金量从高到低排列",type:"s",o:[
+ ["none","无",0],["ccfa","CCF-A 会议或期刊",46],["sci1","SCI 一区",44],["ccfb","CCF-B",36],["sci2","SCI 二区",34],["ccfc","CCF-C",27],["sci3","SCI 三区",24],["core","中文核心",19],["ei","EI 会议",16],["sci4","SCI 四区",13],["jr","普通期刊",9],["ip","发明专利",8],["um","实用新型或软著",4]],neu:0},
+{id:9,g:1,t:"9. 该论文是否与本专业方向相关",n:"",type:"s",o:[
+ ["hi","强相关",1.3],["mid","沾边",1.0],["low","不相关",0.7],["none","无成果",1.0]],neu:1.0},
+{id:10,g:1,t:"10. 作者位次与数量",n:"",type:"s",o:[
+ ["f1","一作 1 篇",1.0],["f2","一作 2 篇及以上",1.15],["cf","共同一作",0.85],["s2","二作",0.6],["ot","其他位次",0.4],["none","无成果",0]],neu:0.6},
+{id:11,g:2,t:"11. 竞赛类型（按中国高等教育学会高校竞赛榜单口径）",n:"算法类指 ACM-ICPC、CCPC、蓝桥杯、天梯赛、Codeforces 等；一类竞赛指榜单内顶级赛事。算法类与一类竞赛评级更高，两个条件同时满足时权重最高。",type:"s",o:[
+ ["c1a","一类竞赛 · 算法类",1.5],["c1n","一类竞赛 · 非算法类",1.15],["c2a","二类竞赛 · 算法类",1.2],["c2n","二类竞赛 · 非算法类",0.7],["unk","不清楚属于哪类",0.6],["none","没参加过",0]],neu:0.6},
+{id:12,g:2,t:"12. 竞赛最高奖项层级",n:"",type:"s",o:[
+ ["g1","国家级一等",55],["g23","国家级二三等奖",42],["p1","省部级一等",32],["p23","省部级二三等奖",24],["sch","校级",0],["none","无奖项",0]],neu:0},
+{id:13,g:2,t:"13. 其他可写的筹码（多选）",n:"选了「都没有」会自动清空其他项；也可以跳过",type:"m",o:[
+ ["intern","大厂或研究所实习",34],["oss","有开源项目且有 star",24],["demo","项目已上线可演示",24],["lead","担任竞赛队长或项目负责人",16],["minor","辅修或双学位",14],["none","都没有",0]],neu:0},
+{id:14,g:2,t:"14. 导师联系进展",n:"弱com院校（导师话语权大）里，这一题直接决定「差在哪」",type:"s",o:[
+ ["none","没联系",0],["sent","发过邮件无回复",0],["pos","有正面回复",1],["met","已见面或有意向表达",2]],neu:0},
+{id:15,g:3,t:"15. 地区与单位类型（多选）",n:"下面两小问决定院校库里要不要放中科院所 / 新型机构",type:"m15",o:[
+ ["bj","北京"],["jsz","江浙沪"],["gs","广深"],["cd","成渝西安"],["any","不限地域"]]},
+{id:16,g:3,t:"16. 学位意向",n:"",type:"s",o:[
+ ["xue","学硕",0],["zhuan","专硕",0],["zhibo","直博",1],["any","均可",0]]},
+{id:17,g:3,t:"17. 目标取向",n:"",type:"s",o:[
+ ["phd","学术读博",0],["job","大厂就业",0],["soe","国企央企求稳",0],["gw","考公",0],["unk","还没想清楚",0]]},
+{id:18,g:3,t:"18. 目前所处阶段",n:"按你保研那年的当前学年作答（不设已毕业、gap 等选项）",type:"s",o:[
+ ["y2","大二下",0],["y3a","大三上",0],["y3b","大三下",0],["y4","大四上",0]]}
+];
+
+/* ════════════════════════════════════════════════════════════
+   数据区二 · 院校库（公开口径：第四轮学科评估 / 官方通知 / 2024实战记录）
+   字段：s校 c学院 m专业 d难度锚 dir适用方向 x交叉方向标签 inst: u高校 cas中科院 new新型机构
+   r地区(bj/jsz/gs/cd/ot) com强弱 pref偏好筹码 pf偏好画像 gate门槛(公开口径,空=自查)
+   exam考核 rk排名硬线(前X%) zb直博友好
+════════════════════════════════════════════════════════════ */
+const LIB=[
+/* —— 计算机 cs —— */
+{s:"清华大学 深圳国际研究生院",c:"数据与信息研究院",m:"计算机科学与技术（直博为主）",d:90,dir:["cs"],x:"",inst:"u",r:"gs",com:"弱",pref:["rank","lab","paper"],pf:"对985前10%、211前5%这类“排名＋科研”双硬的偏好",gate:"2024口径：主要入营985前10%、211前5%；优营约四进一，优营后还要过综合面试",exam:"上机＋面试，需提前联系导师",rk:10,zb:1},
+{s:"北京大学",c:"计算机学院",m:"计算机科学与技术（学硕/直博）",d:94,dir:["cs"],x:"",inst:"u",r:"bj",com:"弱",pref:["rank","paper"],pf:"对头部排名＋科研记录的强偏好",gate:"通知口径：四级525+或六级450+（其一即可）；2024年入营普遍要提前联系导师",exam:"材料审核＋专业技能测评＋面试（7月初线下）",rk:5,zb:1},
+{s:"上海交通大学",c:"计算机学院",m:"计算机科学与技术（含工程硕博士专项）",d:89,dir:["cs"],x:"",inst:"u",r:"jsz",com:"中",pref:["rank","eng","paper"],pf:"“双一流＋前30%”宽口径里筛工程与科研兼修的人",gate:"通知口径：专业前30%（C9放宽）、六级425/托福90/雅思6.0",exam:"面试选拔＋导师互选；夏令营优营报专项须重报",rk:30,zb:1},
+{s:"浙江大学",c:"计算机科学与技术学院",m:"计算机科学与技术/软件工程（直博）",d:88,dir:["cs"],x:"",inst:"u",r:"jsz",com:"弱",pref:["rank","paper","cross"],pf:"直博导向下“排名前10%＋导师认可”的偏好",gate:"通知口径：夏令营前10%，直博六级460；全校预推免限1个志愿",exam:"导师/团队遴选入营＋院系答辩",rk:10,zb:1},
+{s:"南京大学",c:"计算机学院",m:"计算机科学与技术（学硕/专硕）",d:88,dir:["cs"],x:"",inst:"u",r:"jsz",com:"强",pref:["rank","algo"],pf:"机试定生死的强com体系",gate:"2024口径：初筛985前5%起、后放宽到前10%；千人入营笔试后剩约400、优营约80",exam:"笔试＋面试（强com，笔试淘汰率高）",rk:10,zb:0},
+{s:"中国科学技术大学",c:"计算机科学与技术学院",m:"计算机科学与技术（学硕/专硕）",d:88,dir:["cs"],x:"",inst:"u",r:"ot",com:"中",pref:["rank","paper"],pf:"对92院校靠前排名的强偏好（对四非不友好）",gate:"2024口径：92院校排名靠前才有机会，双非入营少见",exam:"夏令营专家组审核＋面试",rk:15,zb:0},
+{s:"哈尔滨工业大学（深圳）",c:"计算机科学与技术学院",m:"计算机科学与技术（学硕/专硕/直博）",d:83,dir:["cs"],x:"",inst:"u",r:"gs",com:"中",pref:["rank","lab","paper"],pf:"重科研记录的门槛（2024年211专业第一也有没入营的案例）",gate:"2024口径：入营对科研有要求；以8月底—9月的预推免为主要批次",exam:"线下机考＋面试，须到深圳校区",rk:10,zb:1},
+{s:"哈尔滨工业大学",c:"计算学部",m:"计算机科学与技术（学硕/专硕/直博）",d:82,dir:["cs"],x:"",inst:"u",r:"ot",com:"强",pref:["rank","algo"],pf:"机试＋面试四方向考核的强com体系",gate:"2024口径：卡综合前15%，基本不存在oq",exam:"30分钟机试＋20分钟面试（沟通/科创/求解/专业基础）",rk:15,zb:1},
+{s:"北京航空航天大学",c:"计算机学院",m:"计算机科学与技术（学硕/专硕/直博）",d:82,dir:["cs"],x:"",inst:"u",r:"bj",com:"强",pref:["rank","algo","eng"],pf:"机试过线进面试的强com（有算法牌更稳）",gate:"2024口径：机试不合格不接收；有ACM等算法奖项入营更容易",exam:"机试过线＋面试",rk:20,zb:1},
+{s:"南方科技大学",c:"计算机科学与工程系",m:"计算机科学与技术（学硕/直博）",d:81,dir:["cs"],x:"",inst:"u",r:"gs",com:"中",pref:["paper","eng","cross"],pf:"新兴研究型校区对科研潜力与工程落地并重",gate:"27届口径：独立报名通道（7月中—8月底），不走校统一系统",exam:"到校现场面试（预计9月中）",rk:null,zb:1},
+{s:"华中科技大学",c:"计算机科学与技术学院",m:"计算机科学与技术（学硕/专硕/直博）",d:78,dir:["cs"],x:"",inst:"u",r:"ot",com:"弱",pref:["lab","rank"],pf:"实验室考核决定录取的弱com体系",gate:"通知口径：直博英语六级425或专八；夏令营双一流/学科评估靠前，双非需rk1（2024）",exam:"实验室考核＋面试；预推免门槛低于夏令营",rk:30,zb:1},
+{s:"武汉大学",c:"计算机学院",m:"计算机科学与技术/软件工程（学硕）＋计算机技术/人工智能（专硕）＋直博",d:78,dir:["cs","se"],x:"",inst:"u",r:"ot",com:"强",pref:["rank","paper"],pf:"英语与排名双硬线的强com面试体系",gate:"27届通知：六级425/雅思6.5/托福80；直博不占硕士推免指标",exam:"预推免考核（面试为主，按成绩排序）",rk:25,zb:1},
+{s:"西安交通大学",c:"计算机学院",m:"计算机科学与技术（学硕/专硕/直博）",d:77,dir:["cs"],x:"",inst:"u",r:"cd",com:"弱",pref:["rank","lab"],pf:"夏令营优营名额多的弱com体系",gate:"2024通知：双一流高校或A-学科，前20%",exam:"导师参与面试；预推免9月中线上面试",rk:20,zb:1},
+{s:"东南大学",c:"计算机科学与工程学院",m:"计算机科学与技术/软件工程（学硕/专硕）",d:77,dir:["cs","se"],x:"",inst:"u",r:"jsz",com:"弱",pref:["lab","eng"],pf:"导师推荐制入营＋学院再考核",gate:"2024口径：需先拿到导师推荐名额，211＋推荐基本能入营",exam:"导师考核＋学院考核",rk:30,zb:0},
+{s:"同济大学",c:"计算机科学与技术学院",m:"计算机科学与技术（学硕/专硕）",d:77,dir:["cs"],x:"",inst:"u",r:"jsz",com:"强",pref:["algo","rank"],pf:"笔试408＋机试C/C++的硬核强com",gate:"2024口径：预推免bar低于夏令营",exam:"笔试（408＋英语）＋机试（C/C++）＋面试",rk:25,zb:0},
+{s:"电子科技大学",c:"计算机科学与工程学院",m:"计算机科学与技术（学硕/专硕）",d:75,dir:["cs"],x:"",inst:"u",r:"cd",com:"弱",pref:["eng","lab"],pf:"“优本计划”联系导师面试即推进的弱com通道",gate:"2024口径：夏令营纯宣讲；9月优本计划是主通道",exam:"联系导师→导师面试→优本入选＋第一志愿优先拟录取",rk:null,zb:0},
+{s:"天津大学",c:"智能与计算学部",m:"计算机科学与技术（学硕/专硕/直博）",d:75,dir:["cs"],x:"",inst:"u",r:"ot",com:"强",pref:["algo","rank"],pf:"机试筛人的强com（海营但机试说话）",gate:"27届通知：研究生院高校前30%/其他高校前10%；六级425或四级550",exam:"线下机试＋现场面试",rk:30,zb:1},
+{s:"北京邮电大学",c:"计算机学院",m:"计算机科学与技术（学硕/专硕）",d:73,dir:["cs"],x:"",inst:"u",r:"bj",com:"弱",pref:["eng","paper"],pf:"分小组导师制的弱com（各组独立招生）",gate:"2024口径：入营不只看rank，科研经历容易入营；务必尽早联系导师",exam:"预报名后联系导师→小组导师面试",rk:null,zb:0},
+{s:"华东师范大学",c:"计算机科学与技术学院",m:"计算机科学与技术（学硕/专硕/直博）",d:71,dir:["cs"],x:"",inst:"u",r:"jsz",com:"强",pref:["rank","cross"],pf:"机考＋面试后当场双选的强com",gate:"27届通知：夏令营要求前20%＋通过六级；2024年入营35人、双非居多、先提交优先",exam:"机考＋面试，结束即双选",rk:20,zb:1},
+{s:"厦门大学",c:"信息学院（特色化示范性软件学院）",m:"计算机科学与技术/软件工程（专硕为主）",d:72,dir:["cs","se"],x:"",inst:"u",r:"ot",com:"弱",pref:["lab","eng"],pf:"导师推荐制的弱com（不联系导师基本不录）",gate:"2024口径：必须提前联系导师拿到推荐；27届两批预推免（7月/9月）",exam:"机试（IOI赛制）＋笔试＋面试，师生互选后发offer",rk:null,zb:0},
+{s:"西北工业大学",c:"计算机学院",m:"计算机科学与技术（学硕/专硕/直博）",d:74,dir:["cs"],x:"",inst:"u",r:"cd",com:"弱",pref:["rank","lab"],pf:"入营即基本稳的弱com（考核不太刷人）",gate:"2024口径：双一流且前1%入营；需提前联系意向导师；六级425",exam:"分课题组导师直接面试",rk:10,zb:1},
+{s:"中国科学院大学 计算技术研究所",c:"——",m:"计算机应用技术/计算机科学与技术（学硕/直博）",d:76,dir:["cs"],x:"",inst:"cas",r:"bj",com:"弱",pref:["paper","lab"],pf:"强所弱com：先联系导师、有霸面传统",gate:"2024口径：bar较高、入营多为985；春闱计划前30%",exam:"面试＋笔试＋英语＋上机考核",rk:30,zb:1},
+{s:"吉林大学",c:"计算机科学与技术学院",m:"计算机科学与技术（学硕/专硕）",d:70,dir:["cs"],x:"",inst:"u",r:"ot",com:"强",pref:["algo","rank"],pf:"算法笔试＋上机各60及格线的强com",gate:"2024口径：211前5%才有希望入营；开放日合格可免复试",exam:"笔试《算法设计综合》＋面试＋上机（各100分，60及格）",rk:15,zb:0},
+{s:"山东大学",c:"计算机科学与技术学院（青岛）",m:"计算机科学与技术（学硕/专硕/直博）",d:70,dir:["cs"],x:"",inst:"u",r:"ot",com:"强",pref:["rank","paper"],pf:"不需联系导师、按考核排名发offer的强com",gate:"2024口径：强com统一面试",exam:"学院面试，按成绩排名发offer",rk:25,zb:1},
+{s:"大连理工大学",c:"计算机科学与技术学院",m:"计算机科学与技术/人工智能（学硕/专硕，硕/直博并行）",d:71,dir:["cs"],x:"",inst:"u",r:"ot",com:"中",pref:["rank","eng"],pf:"硕/直博并行、截止明确的常规强com",gate:"27届口径：预推免截止偏早、先到先审，建议尽早投",exam:"学院面试",rk:25,zb:1},
+{s:"湖南大学",c:"信息科学与工程学院",m:"计算机科学与技术（学硕/专硕/直博）",d:68,dir:["cs"],x:"",inst:"u",r:"ot",com:"强",pref:["rank","eng"],pf:"超发优营的海营强com（985报考即入）",gate:"2024口径：985报考即入营、筛部分双非；优营多但录取速度慢",exam:"统一面试",rk:40,zb:1},
+{s:"重庆大学",c:"计算机学院",m:"计算机科学与技术（学硕/专硕）",d:69,dir:["cs"],x:"",inst:"u",r:"cd",com:"弱",pref:["lab","eng"],pf:"导师一对一视频面的弱com",gate:"2024通知：双一流前20%/其他高校专业第一",exam:"微信联系导师→一对一视频面试",rk:30,zb:0},
+{s:"四川大学",c:"计算机学院（软件学院）",m:"计算机科学与技术（学硕/专硕/直博）",d:66,dir:["cs"],x:"",inst:"u",r:"cd",com:"强",pref:["rank","eng"],pf:"预推免按考研复试标准笔试＋面试的强com",gate:"2024口径：夏令营为宣讲营、双非可试；预推免是主筛选",exam:"笔试＋面试（复试群通知）",rk:50,zb:1},
+{s:"西安电子科技大学",c:"计算机科学与技术学院",m:"计算机科学与技术/软件工程（学硕/专硕/直博）",d:68,dir:["cs","se"],x:"",inst:"u",r:"cd",com:"弱",pref:["eng","lab"],pf:"导师审核通过才能进面的弱com",gate:"27届通知：预报名须导师审核“通过”才能参加综合面试",exam:"线下综合面试（英语听口＋专业＋科研＋综合）",rk:null,zb:1},
+{s:"北京交通大学",c:"计算机与信息技术学院",m:"计算机科学与技术（学硕/专硕/直博）",d:66,dir:["cs"],x:"",inst:"u",r:"bj",com:"中",pref:["algo","eng"],pf:"导师组考核＋机试＋材料三段式",gate:"27届通知：机试9月中；夏令营明确无优营无录取承诺；英语四级或六级425",exam:"导师组考核＋机试（现场机房）＋材料审核",rk:null,zb:1},
+{s:"南京理工大学",c:"计算机科学与工程学院",m:"计算机科学与技术（学硕/专硕）",d:64,dir:["cs"],x:"",inst:"u",r:"jsz",com:"中",pref:["rank"],pf:"报名即入营的宽口径（对四非有门槛）",gate:"2024口径：双非/211报名即可入营、歧视四非",exam:"综合面试",rk:40,zb:0},
+{s:"南京航空航天大学",c:"计算机科学与技术学院",m:"计算机科学与技术（学硕/专硕）",d:64,dir:["cs"],x:"",inst:"u",r:"jsz",com:"中",pref:["rank"],pf:"投了就能进的宽口径＋综合面试",gate:"2024口径：入营简单",exam:"综合面试",rk:50,zb:0},
+{s:"苏州大学",c:"计算机科学与技术学院",m:"计算机科学与技术（学硕/专硕/直博）",d:64,dir:["cs"],x:"",inst:"u",r:"jsz",com:"强",pref:["algo","rank"],pf:"机试过线才能面试的强com",gate:"27届通知：机试《计算机基础综合》（程序设计＋数据结构＋算法），线下机房",exam:"机试＋面试",rk:null,zb:1},
+{s:"深圳大学",c:"计算机与软件学院",m:"计算机科学与技术（学硕）/计算机技术/软件工程/人工智能（专硕）",d:61,dir:["cs","se"],x:"",inst:"u",r:"gs",com:"中",pref:["eng","rank"],pf:"分批面试、深圳就业圈友好",gate:"27届口径：预推免分批面试",exam:"分批次面试",rk:null,zb:0},
+{s:"杭州电子科技大学",c:"计算机学院",m:"计算机科学与技术（学硕/专硕）",d:62,dir:["cs"],x:"",inst:"u",r:"jsz",com:"中",pref:["eng","algo"],pf:"双非强校、杭州IT就业圈",gate:"公开口径：第四轮学科评估计算机B+",exam:"材料审核＋面试",rk:null,zb:0},
+{s:"中国科学院大学 沈阳计算技术研究所",c:"——",m:"计算机科学与技术（学硕/专硕）",d:55,dir:["cs","other"],x:"",inst:"cas",r:"ot",com:"弱",pref:["eng","lab"],pf:"双非同学的优营主战场（2024案例集中地）",gate:"2024经验：导师制、联系导师后面试走流程",exam:"联系导师→所内面试",rk:null,zb:0},
+{s:"中国科学院大学 空天信息创新研究院",c:"——",m:"电子信息（计算机技术/人工智能方向）",d:59,dir:["cs","comm","other"],x:"",inst:"cas",r:"bj",com:"中",pref:["rank","eng"],pf:"排名线明确、预推免通道友好的院所",gate:"通知口径：总评前15%；2024年预推免bar很低、211报名基本录取",exam:"面试＋双选",rk:15,zb:0},
+{s:"中国科学院大学 电工研究所",c:"——",m:"电气工程/计算机应用（学硕/直博）",d:47,dir:["cs","pe","other"],x:"",inst:"cas",r:"bj",com:"弱",pref:["eng"],pf:"2024年实际录取以双非为主的保底院所",gate:"2024经验：bar很低；夏令营营员读硕补8000元/直博2万元",exam:"面试（思想政治＋专业＋外语）",rk:null,zb:1},
+{s:"广东工业大学",c:"计算机学院",m:"计算机科学与技术（学硕/专硕/直博）",d:56,dir:["cs"],x:"",inst:"u",r:"gs",com:"中",pref:["eng","rank"],pf:"湾区就业向、英文现场问答的面试",gate:"27届通知：预推免复试导师用英语现场提问；夏令营前30%＋四级425",exam:"现场复试（英文问答）",rk:30,zb:1},
+{s:"郑州大学",c:"计算机与人工智能学院",m:"计算机科学与技术（学硕/专硕/直博）",d:54,dir:["cs"],x:"",inst:"u",r:"ot",com:"中",pref:["rank"],pf:"意向采集制＋面试",gate:"27届通知：四级合格作为外语材料",exam:"面试（随研招网系统安排）",rk:null,zb:1},
+{s:"江南大学",c:"人工智能与计算机学院",m:"计算机科学与技术/软件工程（学硕/专硕/直博-软工）",d:58,dir:["cs","se"],x:"",inst:"u",r:"jsz",com:"中",pref:["eng","rank"],pf:"线下面试制、四六级作材料",gate:"27届通知：四六级成绩单为申请材料",exam:"面试（校外线上）",rk:null,zb:1},
+{s:"湘潭大学",c:"计算机学院",m:"计算机科学与技术（学硕/专硕）",d:49,dir:["cs"],x:"",inst:"u",r:"ot",com:"中",pref:["rank"],pf:"材料审核＋线下面试的保底档",gate:"27届通知：面试合格线60分",exam:"线下面试",rk:null,zb:0},
+{s:"太原理工大学",c:"计算机科学与技术学院（大数据学院）",m:"计算机科学与技术（学硕/专硕/直博）",d:53,dir:["cs"],x:"",inst:"u",r:"ot",com:"中",pref:["rank"],pf:"材料审核＋面试的常规通道",gate:"27届通知：获推免资格即可报名",exam:"材料审核＋面试",rk:null,zb:1},
+{s:"河北工业大学",c:"人工智能与数据科学学院",m:"人工智能/计算机（学硕/专硕）",d:56,dir:["cs"],x:"数据科学",inst:"u",r:"ot",com:"中",pref:["rank","eng"],pf:"四级硬线的常规面试通道",gate:"27届通知：四级425+；预报名分批安排",exam:"分批线下面试",rk:null,zb:0},
+/* 计算机·交叉 */
+{s:"西安电子科技大学",c:"网络与信息安全学院",m:"网络空间安全（学硕）/网络与信息安全（专硕）",d:66,dir:["cs"],x:"网络空间安全",inst:"u",r:"cd",com:"弱",pref:["eng","lab"],pf:"导师点头后院面走形式的弱com",gate:"2024口径：bar较低，专业排名前列＋1个项目就很稳",exam:"导师面试→院面",rk:null,zb:0},
+{s:"北京理工大学",c:"网络空间安全学院",m:"网络空间安全/密码（学硕/专硕/直博）",d:67,dir:["cs"],x:"网络空间安全",inst:"u",r:"bj",com:"弱",pref:["eng","algo"],pf:"需先联系学科方向教师的弱com",gate:"27届通知：四级425+；需先联系方向教师再交材料",exam:"线上面试（各方向自定）",rk:null,zb:1},
+{s:"武汉大学",c:"国家网络安全学院",m:"网络空间安全（学硕/专硕/直博）",d:70,dir:["cs"],x:"网络空间安全",inst:"u",r:"ot",com:"强",pref:["algo","rank"],pf:"背景分40%＋面试60%的强com",gate:"2024口径：优营严格按分数排序",exam:"背景评估＋面试",rk:25,zb:0},
+{s:"上海交通大学",c:"人工智能学院",m:"人工智能（直博/学硕）",d:85,dir:["cs"],x:"人工智能",inst:"u",r:"jsz",com:"中",pref:["rank","paper"],pf:"双一流＋前20%的AI直博通道",gate:"27届通知：双一流在读、前20%、六级425",exam:"报名审核＋面试",rk:20,zb:1},
+{s:"南京大学",c:"人工智能学院",m:"人工智能（学硕/直博，LAMDA等）",d:83,dir:["cs"],x:"人工智能",inst:"u",r:"jsz",com:"强",pref:["paper","algo"],pf:"LAMDA等强组独立选拔＋学院营的强com",gate:"2024口径：几乎全985/211前10%；LAMDA组独立两轮面试（学院营前单独报名）",exam:"组面＋学院考核",rk:10,zb:1},
+{s:"中国科学院大学 信息工程研究所",c:"——",m:"网络空间安全/电子信息（学硕/专硕/直博）",d:67,dir:["cs","comm"],x:"网络空间安全",inst:"cas",r:"bj",com:"弱",pref:["lab","eng"],pf:"与中关村实验室合办密码暑期学校的弱com所",gate:"通知口径：四级或六级；夏令营优营预推免免重报",exam:"分部门面试（问卷选部门）",rk:null,zb:1},
+{s:"鹏城实验室（×哈工大深圳联培）",c:"信息类研究部",m:"电子信息 直博（联培，5–7年）",d:76,dir:["cs","comm"],x:"",inst:"new",r:"gs",com:"弱",pref:["paper","eng"],pf:"国家实验室联培直博：科研规划写得清就有戏",gate:"27届口径：材料含1500字科研规划；信息类7个部门邮箱直投",exam:"按哈工大（深圳）推免流程＋联培审核",rk:null,zb:1},
+/* —— 软件 se 补充 —— */
+{s:"北京大学",c:"软件与微电子学院",m:"软件工程/电子信息（含工程硕博士专项：AI/网安/新一代电子/关键基础软件）",d:82,dir:["se"],x:"",inst:"u",r:"bj",com:"强",pref:["rank","eng"],pf:"北大“价值洼地”，入营主要看排名（2024）",gate:"2024口径：排名权重高；工程硕博为工学交替培养（2年在校＋3年企业）",exam:"材料审核＋面试",rk:15,zb:1},
+{s:"南京大学",c:"软件学院",m:"软件工程（学硕/专硕）",d:79,dir:["se"],x:"",inst:"u",r:"jsz",com:"强",pref:["rank","algo"],pf:"卡前10%、以92为主的强com",gate:"2024口径：主要筛985/211；预推免入营仅约70人",exam:"笔试＋面试",rk:10,zb:0},
+{s:"浙江大学",c:"软件学院",m:"软件工程/电子信息（专硕93+127人）＋直博33人",d:77,dir:["se"],x:"",inst:"u",r:"jsz",com:"弱",pref:["rank","paper"],pf:"只招专硕＋直博；名额多但英语线硬",gate:"27届通知：直博六级460（CCF-A/B一作可放宽）",exam:"复试办法另发（导师组项目考核传统）",rk:15,zb:1},
+{s:"北京航空航天大学",c:"软件学院",m:"软件工程（学硕/专硕）",d:78,dir:["se"],x:"",inst:"u",r:"bj",com:"强",pref:["algo","rank"],pf:"有ACM牌子不卡rank、没牌子卡211前几",gate:"2024口径：算法奖项是硬通货",exam:"夏令营考核＋机试",rk:20,zb:0},
+{s:"东南大学",c:"软件学院",m:"软件工程（学硕/专硕）",d:71,dir:["se"],x:"",inst:"u",r:"jsz",com:"弱",pref:["lab","eng"],pf:"导师推荐＋学院教务卡排名比例",gate:"2024口径：中弱com，每个老师推荐名额有限",exam:"导师先面→学院考核",rk:30,zb:0},
+{s:"华东师范大学",c:"软件工程学院（滴水湖国际软件学院）",m:"软件工程（专硕 085405）或直博（083500）二选一",d:69,dir:["se"],x:"",inst:"u",r:"jsz",com:"强",pref:["rank","eng"],pf:"报名时就要在专硕/直博里二选一",gate:"27届通知：夏令营前20%；六级或雅思托福优先",exam:"机试＋面试＋双选",rk:20,zb:1},
+{s:"电子科技大学",c:"信息与软件工程学院",m:"软件工程（学硕/专硕）",d:67,dir:["se"],x:"",inst:"u",r:"cd",com:"弱",pref:["eng","lab"],pf:"入营容易（营员主要211、部分双非）的弱com",gate:"2024口径：联系导师为主",exam:"联系导师→面试",rk:null,zb:0},
+{s:"吉林大学",c:"软件学院",m:"软件工程（学硕/专硕）",d:64,dir:["se"],x:"",inst:"u",r:"ot",com:"强",pref:["algo","rank"],pf:"算法笔试体系（与计算机学院同款）",gate:"2024口径：预推免集中安排笔试＋面试",exam:"笔试《算法设计综合》＋面试（含上机）",rk:null,zb:0},
+{s:"山东大学",c:"软件学院（济南）",m:"软件工程（学硕/专硕/直博）",d:64,dir:["se"],x:"",inst:"u",r:"ot",com:"强",pref:["rank","paper"],pf:"宣讲营bar不高、预推免是真筛选",gate:"2024口径：夏令营为宣讲营；直博须提前联系导师确认招生计划",exam:"学院复试",rk:null,zb:1},
+{s:"大连理工大学",c:"软件学院（含立命馆国际信息与软件学院）",m:"软件工程（学硕/专硕）",d:62,dir:["se"],x:"",inst:"u",r:"ot",com:"中",pref:["rank","eng"],pf:"卡92排名＋科研综合考虑",gate:"2024口径：211排名靠前基本可入",exam:"面试",rk:null,zb:0},
+{s:"中国科学院大学 软件研究所",c:"——",m:"计算机科学与技术/软件工程（学硕/直博）",d:73,dir:["se","cs"],x:"",inst:"cas",r:"bj",com:"弱",pref:["paper","lab"],pf:"中文信息实验室六级480；offer承诺“不鸽”＋waiting list",gate:"通知口径：中文信息实验室六级480+（专业特别优秀可放宽）；7月夏令营是最主要窗口",exam:"笔试＋机试＋导师组面试",rk:null,zb:1},
+/* —— 电子 ee —— */
+{s:"清华大学",c:"电子工程系",m:"信息与通信工程/电子科学与技术（直博）",d:90,dir:["ee","comm"],x:"",inst:"u",r:"bj",com:"强",pref:["rank","paper"],pf:"对外校基本只要专业第一（2024）",gate:"2024口径：外校基本只要专排第一，科研出色才略放宽",exam:"综合面试（分5个小组，每组不少于5分钟）",rk:5,zb:1},
+{s:"北京大学",c:"电子学院",m:"电子科学与技术/信息与通信工程（学硕/直博）",d:84,dir:["ee","comm"],x:"",inst:"u",r:"bj",com:"中",pref:["paper","lab"],pf:"偏器件、重科研，科研过硬可放宽排名",gate:"通知口径：英语四级525+或六级450+；2024口径：985/211友好、有硬科研可放宽",exam:"材料审核＋专业技能测评＋面试",rk:20,zb:1},
+{s:"上海交通大学",c:"电子信息与电气工程学院",m:"电子科学与技术/信息与通信工程（学硕/专硕/直博）",d:83,dir:["ee","comm"],x:"",inst:"u",r:"jsz",com:"弱",pref:["rank","eng"],pf:"双一流理工前30%、C9放宽；面试不刷人＋导师互选",gate:"通知口径：专业前30%（C9放宽）、六级425；中上211约需rk1–2（2024）",exam:"面试＋导师双选（预录取确认窗口极短）",rk:30,zb:1},
+{s:"复旦大学",c:"微电子学院",m:"集成电路科学与工程/微电子（学硕/专硕）",d:82,dir:["ee"],x:"集成电路",inst:"u",r:"jsz",com:"强",pref:["rank","paper"],pf:"学硕几乎只要各校专业第一（除顶尖高校）",gate:"2024口径：入营均为985＋相关专业前10%",exam:"材料审核＋面试",rk:10,zb:0},
+{s:"浙江大学",c:"信息与电子工程学院",m:"信息与通信工程/电子科学与技术（直博优先）",d:79,dir:["ee","comm"],x:"",inst:"u",r:"jsz",com:"弱",pref:["rank","paper"],pf:"基本没有双非入营；夏令营只招直博倾向",gate:"2024口径：211基本只要1–2名、985前5%；夏令营英语六级480（460–480酌情）",exam:"导师遴选＋学院考核",rk:10,zb:1},
+{s:"东南大学",c:"电子科学与工程学院",m:"电子科学与技术（学硕/专硕/直博）",d:75,dir:["ee"],x:"",inst:"u",r:"jsz",com:"强",pref:["rank","lab"],pf:"电子科学与技术A＋学科的强com群面",gate:"2024口径：群面分课题组进行",exam:"群面（分课题组）",rk:20,zb:1},
+{s:"华中科技大学",c:"光学与电子信息学院",m:"电子科学与技术/光学工程/集成电路（学硕/专硕）",d:71,dir:["ee"],x:"光电信息",inst:"u",r:"ot",com:"强",pref:["paper","lab"],pf:"微电子方向入营容易、学硕难（重科研竞赛）",gate:"2024口径：不怎么看学校背景，看科研竞赛",exam:"材料审核＋面试",rk:null,zb:0},
+{s:"哈尔滨工业大学（深圳）",c:"集成电路学院",m:"集成电路科学与工程（学硕/专硕/直博）",d:72,dir:["ee"],x:"集成电路",inst:"u",r:"gs",com:"中",pref:["rank","eng"],pf:"线下面试、集中一批审核",gate:"27届通知：集中一批审核；面试在深圳校区",exam:"线下面试",rk:null,zb:1},
+{s:"西北工业大学",c:"集成电路学院（微电子学院）",m:"集成电路科学与工程/电子信息（学硕/专硕/直博）",d:69,dir:["ee"],x:"集成电路",inst:"u",r:"cd",com:"弱",pref:["rank","eng"],pf:"夏令营前40%＋六级425；预推免9月中下旬",gate:"27届通知：夏令营专业前40%、六级425或托福72；2027年拟收硕士32人/直博3人",exam:"夏令营线上宣讲＋预推免面试",rk:40,zb:1},
+{s:"中山大学",c:"微电子科学与技术学院",m:"电子科学与技术/集成电路科学与工程（学硕/专硕/直博）",d:69,dir:["ee"],x:"集成电路",inst:"u",r:"gs",com:"强",pref:["rank","eng"],pf:"两批预推免、30%英语＋70%业务的统一分值",gate:"27届通知：复试总分100=英语30%＋业务70%；面试硕≥20min/博≥30min",exam:"材料审核＋面试",rk:null,zb:1},
+{s:"电子科技大学",c:"集成电路科学与工程学院",m:"集成电路科学与工程（学硕/专硕）",d:70,dir:["ee"],x:"集成电路",inst:"u",r:"cd",com:"弱",pref:["eng","lab"],pf:"优本库计划：联系导师面试入选即offer（2024）",gate:"2024口径：弱com，夏令营不发offer",exam:"联系导师→面试→优本库",rk:null,zb:0},
+{s:"西安电子科技大学",c:"集成电路学部（微电子学院）",m:"集成电路科学与工程/微电子（学硕/专硕/直博）",d:68,dir:["ee"],x:"集成电路",inst:"u",r:"cd",com:"弱",pref:["eng","lab"],pf:"现场面试、综合面试不少于20分钟",gate:"27届通知：材料按“姓名-文件名”合并1个PDF",exam:"现场综合面试",rk:null,zb:1},
+{s:"中国科学院大学 半导体研究所",c:"——",m:"微电子学与固体电子学/集成电路（学硕/直博）",d:69,dir:["ee"],x:"集成电路",inst:"cas",r:"bj",com:"弱",pref:["paper","lab"],pf:"报名须填意向导师（仅限1位）的弱com所",gate:"27届通知：报名后统一安排面试",exam:"专家小组面试（专业素质＋英语口语＋文献翻译）",rk:null,zb:1},
+{s:"中国科学院大学 微电子研究所",c:"——",m:"微电子/集成电路（学硕/专硕/直博）",d:65,dir:["ee"],x:"集成电路",inst:"cas",r:"bj",com:"弱",pref:["lab","eng"],pf:"导师权力大、导师决定offer的弱com所",gate:"通知口径：专业前20%＋四级；2024口径：入营较简单、填报基本能过",exam:"分导师面试（导师决定）",rk:20,zb:1},
+{s:"中国科学院大学 上海微系统与信息技术研究所",c:"——",m:"微电子/电子信息（学硕/直博）",d:62,dir:["ee"],x:"集成电路",inst:"cas",r:"jsz",com:"弱",pref:["eng","lab"],pf:"2024年缺人、录取机会大的友好所",gate:"2024经验：较缺人，录取机会大",exam:"面试（9月中旬后分批）",rk:null,zb:1},
+{s:"上海科技大学",c:"信息科学与技术学院",m:"电子科学与技术/信息与通信工程（学硕/专硕/直博）",d:72,dir:["ee","comm"],x:"",inst:"u",r:"jsz",com:"中",pref:["paper","eng"],pf:"学硕须选报3位意向导师的院所制",gate:"27届通知：复试=线上综合素质＋线下专业面试",exam:"线上综合素质考核＋线下专业面试",rk:null,zb:1},
+{s:"南京邮电大学",c:"电子与光学工程学院/柔性电子（未来技术）学院",m:"电子科学与技术/光学工程/电子信息（学硕/专硕）",d:58,dir:["ee"],x:"光电信息",inst:"u",r:"jsz",com:"中",pref:["rank","eng"],pf:"27届各院分办夏令营开放日",gate:"27届口径：各院细则以官网为准（本条留空自查）",exam:"材料审核＋面试（以当年简章为准）",rk:null,zb:0},
+{s:"西安邮电大学",c:"通信与信息工程学院/计算机学院",m:"电子信息（学硕/专硕）",d:50,dir:["ee","comm"],x:"",inst:"u",r:"cd",com:"中",pref:["rank"],pf:"西北电子信息就业向的保底档",gate:"以当年招生简章为准（本条留空自查）",exam:"以当年简章为准",rk:null,zb:0},
+/* —— 通信 comm 补充 —— */
+{s:"东南大学",c:"信息科学与工程学院",m:"信息与通信工程/电子信息（学硕/专硕/直博）",d:77,dir:["comm"],x:"",inst:"u",r:"jsz",com:"强",pref:["rank","eng"],pf:"英语硬线＋导师同意证明缺一无效的直博通道",gate:"27届通知：四级500+或六级425+；直博须2封推荐信＋导师同意证明",exam:"学院考核（无机试、面试为主）",rk:25,zb:1},
+{s:"北京邮电大学",c:"信息与通信工程学院",m:"信息与通信工程/电子信息（学硕/专硕）",d:75,dir:["comm"],x:"",inst:"u",r:"bj",com:"弱",pref:["eng","paper"],pf:"导师发入营资格＋优营＝offer的弱com（2024）",gate:"2024口径：务必尽早联系导师",exam:"联系导师→入营→优营→双选",rk:null,zb:0},
+{s:"电子科技大学",c:"信息与通信工程学院",m:"信息与通信工程/电子信息（学硕/专硕）",d:73,dir:["comm"],x:"",inst:"u",r:"cd",com:"弱",pref:["eng","rank"],pf:"27届优本计划含英语考核100分",gate:"27届通知：优本计划入选＋第一志愿＝优先推荐拟录取",exam:"优本计划登记→材料审核→复试（含英语）",rk:null,zb:0},
+{s:"哈尔滨工业大学",c:"电子与信息工程学院",m:"信息与通信工程/电子信息（学硕/专硕）",d:73,dir:["comm"],x:"",inst:"u",r:"ot",com:"强",pref:["rank","lab"],pf:"硕士基本不需联系导师、主考官看成绩的强com",gate:"2024口径：成绩稳、能拿保研资格，主考官就会要",exam:"面试（主考官＋考官）",rk:null,zb:0},
+{s:"武汉大学",c:"电子信息学院",m:"电子科学与技术/信息与通信工程（学硕/直博）",d:73,dir:["comm","ee"],x:"",inst:"u",r:"ot",com:"强",pref:["rank","paper"],pf:"两批预推免＋直博专场（9月中）",gate:"27届通知：直博要求六级425/雅思6.5/托福92；欢迎计算机等关联学科",exam:"预推免考核",rk:25,zb:1},
+{s:"西安电子科技大学",c:"通信工程学院",m:"信息与通信工程/电子信息（学硕/专硕/直博）",d:68,dir:["comm"],x:"",inst:"u",r:"cd",com:"弱",pref:["eng","lab"],pf:"排名须注明专业总人数的弱com",gate:"27届通知：综合面试不少于20分钟",exam:"综合面试",rk:null,zb:1},
+{s:"中山大学",c:"电子与通信工程学院",m:"信息与通信工程/电子信息（学硕/专硕/直博）",d:69,dir:["comm","ee"],x:"",inst:"u",r:"gs",com:"强",pref:["rank","eng"],pf:"夏令营六级426硬线（或四级500）",gate:"27届通知：夏令营英语硬线六级≥426/四级≥500/雅思6.0/托福90",exam:"面试（30%英语＋70%业务）",rk:null,zb:1},
+{s:"吉林大学",c:"通信工程学院",m:"信息与通信工程（学硕/直博）",d:61,dir:["comm"],x:"",inst:"u",r:"ot",com:"中",pref:["rank","algo"],pf:"四级425+、线下笔试＋面试",gate:"27届通知：材料审核后公布入围名单",exam:"专业课笔试＋综合面试＋英语听说",rk:null,zb:1},
+{s:"杭州电子科技大学",c:"通信工程学院",m:"信息与通信工程/电子信息（学硕/专硕）",d:60,dir:["comm"],x:"",inst:"u",r:"jsz",com:"中",pref:["rank","eng"],pf:"双非通信强校、杭邮就业圈",gate:"公开口径：第四轮学科评估通信B",exam:"材料审核＋面试",rk:null,zb:0},
+{s:"中国科学院大学 声学研究所",c:"——",m:"信息与通信工程/电子信息（学硕/直博）",d:66,dir:["comm"],x:"",inst:"cas",r:"bj",com:"弱",pref:["paper","lab"],pf:"全国重点高校口径、年度硕士约170人的大所",gate:"通知口径：全国重点高校（985/211/行业高校）；2027年拟招硕士约170人",exam:"综合素质考核＋专业能力面试",rk:null,zb:1},
+{s:"中国科学院大学 沈阳自动化研究所",c:"——",m:"机械电子/控制/通信（学硕/直博）",d:56,dir:["comm","auto","me"],x:"",inst:"cas",r:"ot",com:"弱",pref:["eng","lab"],pf:"2024口径：入营难但入营大概率优营、不鸽人",gate:"通知口径：四级；预推免随时报名（提前2天）",exam:"综合面试＋英语＋体检",rk:null,zb:1},
+{s:"重庆邮电大学",c:"通信与信息工程学院",m:"信息与通信工程/电子信息（学硕/专硕）",d:53,dir:["comm"],x:"",inst:"u",r:"cd",com:"中",pref:["rank","eng"],pf:"双非通信强校（以当年简章为准）",gate:"以当年招生简章为准（本条留空自查）",exam:"以当年简章为准",rk:null,zb:0},
+/* —— 自动化 auto —— */
+{s:"清华大学",c:"自动化系",m:"控制科学与工程（直博/硕士）",d:88,dir:["auto"],x:"",inst:"u",r:"bj",com:"中",pref:["rank","paper"],pf:"博士弱com、硕士强com；无机试",gate:"2024口径：博士提前联系老师可直博；硕士不需提前联系、只面试",exam:"面试为主（博士需导师沟通）",rk:10,zb:1},
+{s:"浙江大学",c:"控制科学与工程学院",m:"控制科学与工程（学硕/直博）＋工程硕博士专项",d:81,dir:["auto"],x:"",inst:"u",r:"jsz",com:"弱",pref:["paper","lab","algo"],pf:"项目制弱com：300人预备营→100人正式营",gate:"27届通知：直博六级480（或460＋一作全英文论文）；专项放宽到前50%",exam:"志愿投递→线上项目考核与答辩→线下考核",rk:15,zb:1},
+{s:"西安交通大学",c:"自动化科学与工程学院",m:"控制科学与工程（学硕/专硕/直博）",d:77,dir:["auto"],x:"",inst:"u",r:"cd",com:"中",pref:["rank","lab"],pf:"门槛高但通过率不低的自动化老牌强院",gate:"2024口径：985前10%、211约1%；预推免9月22日起复试",exam:"材料审核＋面试",rk:10,zb:1},
+{s:"上海交通大学",c:"电子信息与电气工程学院（自动化）",m:"控制科学与工程（学硕/直博）",d:83,dir:["auto"],x:"",inst:"u",r:"jsz",com:"弱",pref:["rank","eng"],pf:"双一流理工前30%（C9放宽）、导师互选制",gate:"通知口径：六级425；面试不刷人、第二轮导师互选",exam:"面试＋导师双选",rk:30,zb:1},
+{s:"哈尔滨工业大学（深圳）",c:"智能学部（控制/智能方向）",m:"控制科学与工程/智能科学与技术（学硕/专硕/直博）",d:75,dir:["auto"],x:"",inst:"u",r:"gs",com:"中",pref:["rank","lab"],pf:"六级为硬门槛的学部统一营",gate:"27届通知：智能学部夏令营控制/智能方向原则上要求六级通过；预推免为独立批次",exam:"材料审核＋线下面试（深圳校区）",rk:null,zb:1},
+{s:"东南大学",c:"自动化学院",m:"控制科学与工程/仪器仪表（学硕/专硕）",d:75,dir:["auto"],x:"",inst:"u",r:"jsz",com:"强",pref:["rank","algo"],pf:"500人营选180优营、优营必录的强com",gate:"2024口径：985一般前10%；面试把自动化课程问得很细",exam:"只面试（专业课考核非常细）",rk:10,zb:0},
+{s:"华中科技大学",c:"人工智能与自动化学院",m:"控制科学与工程/人工智能（学硕/专硕/直博）",d:75,dir:["auto"],x:"人工智能",inst:"u",r:"ot",com:"弱",pref:["lab","eng"],pf:"入营后联系老师、单独面试即offer的弱com",gate:"2024口径：过了单独面试就可拿offer",exam:"单独面试（无群面）",rk:null,zb:1},
+{s:"北京理工大学",c:"自动化学院",m:"控制科学与工程（学硕/专硕/直博）",d:71,dir:["auto"],x:"",inst:"u",r:"bj",com:"弱",pref:["lab","eng"],pf:"导师制的弱com：导师报名、导师发面试通知",gate:"2024口径：预推免不统一组织报名，自己联系导师",exam:"导师组织面试",rk:null,zb:1},
+{s:"中国科学院大学 自动化研究所",c:"——",m:"控制科学与工程/人工智能（学硕/直博）",d:77,dir:["auto","cs"],x:"人工智能",inst:"cas",r:"bj",com:"强",pref:["paper","rank"],pf:"强com双选：面试通过还要和导师达成双选",gate:"2024口径：211基本只要1–2名、985约前5%",exam:"面试＋导师双选（工程硕博专项另设批次）",rk:10,zb:1},
+{s:"中南大学",c:"自动化学院",m:"控制科学与工程（学硕/专硕/直博）",d:65,dir:["auto"],x:"",inst:"u",r:"ot",com:"强",pref:["rank","eng"],pf:"材料百分制打分→择优面试的强com",gate:"27届通知：面试全程录音录像",exam:"材料审核打分→面试",rk:null,zb:1},
+{s:"华南理工大学",c:"自动化科学与工程学院",m:"控制科学与工程（学硕/专硕）",d:65,dir:["auto"],x:"",inst:"u",r:"gs",com:"弱",pref:["eng","lab"],pf:"面试好好表现都能过、但必须有老师接收的弱com",gate:"2024口径：过线≠录取，必须导师双选签协议",exam:"面试→导师双选→签协议",rk:null,zb:0},
+{s:"重庆大学",c:"自动化学院",m:"控制科学与工程（学硕/专硕）",d:61,dir:["auto"],x:"",inst:"u",r:"cd",com:"弱",pref:["lab","eng"],pf:"中流211前10%可进、偏爱科研经历丰富的弱com",gate:"2024口径：双非前3名拿offer概率大；必须先联系老师",exam:"导师课题组单独面试",rk:null,zb:0},
+{s:"东北大学",c:"信息科学与工程学院",m:"控制科学与工程（学硕/专硕/直博）",d:61,dir:["auto"],x:"",inst:"u",r:"ot",com:"强",pref:["rank","algo"],pf:"全校四级425原则线、先申请先审核",gate:"27届口径：复试以面试考核为主；优秀推免生可申请直博",exam:"面试考核",rk:null,zb:1},
+{s:"西北工业大学",c:"自动化学院",m:"控制科学与工程/人工智能（学硕/专硕/直博）",d:64,dir:["auto"],x:"人工智能",inst:"u",r:"cd",com:"弱",pref:["lab","eng"],pf:"双一流口径、线下综合考核；名额较大（硕155/博35）",gate:"27届通知：全国双一流高校2027届；限报1个志愿",exam:"线下综合考核",rk:null,zb:1},
+{s:"哈尔滨工程大学",c:"智能科学与工程学院",m:"控制科学与工程/仪器/电气（学硕/专硕/直博）",d:58,dir:["auto"],x:"",inst:"u",r:"ot",com:"中",pref:["rank","eng"],pf:"“智创育苗”直博计划的工科口",gate:"27届通知：直博生额外资金支持",exam:"夏令营交流＋预推免复试",rk:null,zb:1},
+{s:"中国科学院大学 沈阳自动化研究所（机器人方向）",c:"——",m:"机械电子/机器人/控制（学硕/直博）",d:56,dir:["auto","me"],x:"智能机器人与无人系统",inst:"cas",r:"ot",com:"弱",pref:["eng","lab"],pf:"机器人与智能制造方向的友好所（入营大概率优营）",gate:"通知口径：四级；专业含自动化/机械/机器人/计算机等",exam:"综合面试＋英语＋体检",rk:null,zb:1},
+/* —— 机械 me —— */
+{s:"上海交通大学",c:"机械与动力工程学院",m:"机械工程（学硕/直博）",d:80,dir:["me"],x:"",inst:"u",r:"jsz",com:"强",pref:["rank","paper"],pf:"机械A＋学科的头部门户",gate:"公开口径：第四轮学科评估机械A+；其余以当年简章为准",exam:"材料审核＋面试（以当年简章为准）",rk:15,zb:1},
+{s:"西安交通大学",c:"机械工程学院",m:"机械工程（学硕/专硕/直博）",d:74,dir:["me"],x:"",inst:"u",r:"cd",com:"中",pref:["rank","lab"],pf:"机械A学科、西交常规通道",gate:"公开口径：第四轮学科评估机械A；以当年简章为准",exam:"材料审核＋面试",rk:20,zb:1},
+{s:"哈尔滨工业大学",c:"机电工程学院",m:"机械工程（学硕/专硕/直博）",d:73,dir:["me"],x:"",inst:"u",r:"ot",com:"强",pref:["rank","eng"],pf:"5分钟PPT＋问答、必须导师双选才给offer",gate:"2024口径：强com但发offer要完成双选",exam:"PPT面试＋导师双选",rk:20,zb:1},
+{s:"华中科技大学",c:"机械科学与工程学院",m:"机械工程（学硕/专硕/直博）",d:71,dir:["me"],x:"智能制造",inst:"u",r:"ot",com:"弱",pref:["lab","eng"],pf:"导师权力大、可提前捞录取的弱com",gate:"2024口径：先联系导师才有机会入营",exam:"导师考核＋面试",rk:null,zb:1},
+{s:"大连理工大学",c:"机械工程学院",m:"机械工程（学硕/专硕/直博）",d:61,dir:["me"],x:"智能制造",inst:"u",r:"ot",com:"强",pref:["rank","eng"],pf:"看背景分两批面试：第一批拟录取、第二批候补",gate:"2024口径：15分钟PPT自我介绍＋问答",exam:"PPT面试（分批）",rk:null,zb:1},
+{s:"西北工业大学",c:"机电学院",m:"机械工程（学硕/专硕）",d:62,dir:["me"],x:"",inst:"u",r:"cd",com:"弱",pref:["rank","eng"],pf:"入营主要双非第一/211前列/985",gate:"2024口径：入营画像明确",exam:"导师面＋学院考核",rk:null,zb:0},
+{s:"吉林大学",c:"机械与航空航天工程学院/汽车工程学院",m:"机械工程/车辆工程（学硕/专硕）",d:58,dir:["me"],x:"智能制造",inst:"u",r:"ot",com:"中",pref:["rank","eng"],pf:"四级425＋、开放日交流制",gate:"27届通知：四级425分及以上",exam:"开放日交流＋预推免面试",rk:null,zb:0},
+{s:"重庆大学",c:"机械与运载工程学院",m:"机械工程（学硕/专硕）",d:57,dir:["me"],x:"智能制造",inst:"u",r:"cd",com:"强",pref:["rank","eng"],pf:"面试较为随意的强com（自我介绍＋自由问答）",gate:"2024口径：强com",exam:"面试",rk:null,zb:0},
+{s:"湖南大学",c:"机械与运载工程学院",m:"机械工程（学硕/专硕/直博）",d:57,dir:["me"],x:"智能制造",inst:"u",r:"ot",com:"中",pref:["rank","eng"],pf:"常规预推免通道（8月底系统报名）",gate:"27届口径：预推免系统报名制",exam:"面试",rk:null,zb:1},
+{s:"南京理工大学",c:"机械工程学院",m:"机械工程（学硕/专硕）",d:55,dir:["me"],x:"智能制造",inst:"u",r:"jsz",com:"中",pref:["rank"],pf:"兵工背景、常规面试通道",gate:"以当年招生简章为准",exam:"面试",rk:null,zb:0},
+{s:"合肥工业大学",c:"机械工程学院/汽车与交通工程学院",m:"机械工程/车辆工程（学硕/专硕）",d:52,dir:["me"],x:"智能制造",inst:"u",r:"ot",com:"中",pref:["rank","eng"],pf:"常规面试通道（27届预推免8月26日–9月15日）",gate:"27届通知：预推免系统统一报名",exam:"学院初审→复试",rk:null,zb:0},
+/* —— 能动 pe —— */
+{s:"西安交通大学",c:"电气工程学院/国家储能平台",m:"电气工程/储能科学与工程（学硕/专硕/直博）",d:78,dir:["pe","auto"],x:"储能科学与工程",inst:"u",r:"cd",com:"弱",pref:["rank","lab"],pf:"储能平台offer效力高但入营要求高",gate:"2024口径：电气夏令营只有985有机会入营、偏爱本校会鸽人；储能平台27届预推免要求高",exam:"导师联系＋学院考核",rk:20,zb:1},
+{s:"上海交通大学",c:"国家电投智慧能源创新学院",m:"电气工程/能源动力（学硕/专硕/直博）",d:75,dir:["pe"],x:"智慧能源",inst:"u",r:"jsz",com:"强",pref:["rank","paper","eng"],pf:"双一流前5%或科研突出者的能源口",gate:"27届通知：双一流前5%，或科研/高水平论文经历（学院人才小组认定）；总分200分考核",exam:"专业基础＋英语＋科研潜力＋综合（200分制）",rk:10,zb:1},
+{s:"天津大学",c:"电气自动化与信息工程学院",m:"电气工程/信息与通信工程/控制（学硕/专硕/直博）",d:73,dir:["pe","auto","comm"],x:"",inst:"u",r:"ot",com:"中",pref:["rank","lab"],pf:"“海王”名声在外：211常被当备胎（2024）",gate:"2024口径：今年只有985能录取、211只是备胎",exam:"材料审核＋面试（含实验/实践考核）",rk:30,zb:1},
+{s:"华中科技大学",c:"电气与电子工程学院",m:"电气工程（学硕/专硕/直博）",d:72,dir:["pe"],x:"",inst:"u",r:"ot",com:"强",pref:["rank","paper"],pf:"电气A学科、强com统一考核",gate:"公开口径：第四轮学科评估电气A；其余以当年简章为准",exam:"材料审核＋面试",rk:20,zb:1},
+{s:"华北电力大学（北京）",c:"电气与电子工程学院",m:"电气工程（学硕/专硕/直博）",d:65,dir:["pe"],x:"智慧能源",inst:"u",r:"bj",com:"强",pref:["rank","eng"],pf:"电力央企就业向的电气口（不接收跨一级学科）",gate:"27届通知：硕士原则上六级425/雅思6.5/托福90",exam:"复试录取办法另发",rk:null,zb:1},
+{s:"华北电力大学（保定）",c:"电力工程系",m:"电气工程（学硕/专硕）＋交叉学科专项",d:58,dir:["pe","cs"],x:"智慧能源",inst:"u",r:"ot",com:"强",pref:["rank","eng"],pf:"交叉专项前5%、欢迎计算机类（0809）背景",gate:"27届通知：学硕六级425/雅思6.5/托福90；交叉专项综合成绩前5%",exam:"现场抽题（外语听口＋思想＋专业）",rk:10,zb:0},
+{s:"重庆大学",c:"电气工程学院",m:"电气工程（学硕/专硕/直博）",d:67,dir:["pe"],x:"",inst:"u",r:"cd",com:"弱",pref:["lab","eng"],pf:"必须导师推荐信、导师自行面试的弱com",gate:"2024口径：联系导师双向确定后，夏令营/预推免走过场",exam:"导师面试→学院流程",rk:null,zb:1},
+{s:"山东大学",c:"电气工程学院",m:"电气工程（学硕/专硕）",d:60,dir:["pe"],x:"",inst:"u",r:"ot",com:"强",pref:["rank","eng"],pf:"省内热度高、名额少的电气口（夏令营仅宣传）",gate:"2024口径：夏令营offer效力不足；建议211且学科评估B+以上报学硕",exam:"预推免学院面试",rk:null,zb:0},
+{s:"四川大学",c:"电气工程学院",m:"电气工程（学硕/专硕/直博）",d:57,dir:["pe"],x:"",inst:"u",r:"cd",com:"中",pref:["rank","eng"],pf:"线上宣讲营＋A/B类初审的通道",gate:"2024口径：A类获推荐可参加预推免提前批",exam:"初审→预推免考核",rk:null,zb:1},
+{s:"中国科学院大学 电工研究所（能源方向）",c:"——",m:"电气工程（学硕/直博）",d:47,dir:["pe"],x:"",inst:"cas",r:"bj",com:"弱",pref:["eng"],pf:"2024年实际录取以双非为主的保底院所",gate:"2024经验：bar很低；夏令营营员读硕补8000元/直博2万元",exam:"面试（思想政治＋专业＋外语）",rk:null,zb:1},
+/* —— 生医工 bme —— */
+{s:"上海交通大学",c:"生物医学工程学院",m:"生物医学工程（仅直博＋专项）",d:77,dir:["bme"],x:"医学影像AI",inst:"u",r:"jsz",com:"弱",pref:["lab","paper"],pf:"仅开直博和专项、须提前联系导师的通道",gate:"27届通知：本次仅直博＋专项计划；直博须提前联系导师同意后报名；六级425",exam:"校企联合面试（专项）",rk:null,zb:1},
+{s:"中山大学",c:"生物医学工程学院",m:"生物医学工程（学硕/专硕/直博）",d:63,dir:["bme"],x:"医学影像AI",inst:"u",r:"gs",com:"强",pref:["rank","eng"],pf:"夏令营六级426硬线、前30%的分档",gate:"27届通知：夏令营六级≥426；前5学期总评前30%（突出者除外）",exam:"材料审核＋面试",rk:30,zb:1},
+{s:"北京理工大学",c:"医学科学与工程学院",m:"生物医学工程/医学技术（学硕/专硕/直博）",d:59,dir:["bme"],x:"医学影像AI",inst:"u",r:"bj",com:"强",pref:["rank","eng"],pf:"专业课20%＋综合60%＋英语20%的分值结构",gate:"27届通知：报名与复试集中在预推免批次内完成",exam:"专业知识测试＋综合能力＋英语口语听力",rk:null,zb:1},
+{s:"电子科技大学",c:"生命科学与技术学院",m:"生物医学工程/电子信息（学硕/专硕）",d:57,dir:["bme"],x:"医学影像AI",inst:"u",r:"cd",com:"弱",pref:["eng","lab"],pf:"2024年双非优营案例集中的生医工口",gate:"2024经验（来自真实案例）：双非同学拿优营较多；弱com联系导师",exam:"联系导师→面试",rk:null,zb:0},
+{s:"中国科学技术大学 苏州生物医学工程学院（苏州医工所）",c:"——",m:"生物医学工程（学硕/专硕/直博）",d:61,dir:["bme"],x:"医学影像AI",inst:"cas",r:"jsz",com:"中",pref:["rank","eng"],pf:"四/六级425+、现场面试的生医工口",gate:"27届通知：四/六级425分以上；现场面试在苏州",exam:"现场面试",rk:null,zb:1},
+{s:"南方医科大学",c:"生物医学工程学院",m:"生物医学工程（学硕/专硕/直博）",d:55,dir:["bme"],x:"生物信息",inst:"u",r:"gs",com:"中",pref:["rank","eng"],pf:"游学营制、接收不超过50人",gate:"27届通知：六级或雅思6.0或托福90；以游学营为选拔入口",exam:"按教育背景/学业/科研/综合确定入营",rk:null,zb:1},
+{s:"临港实验室（联培直博）",c:"脑机接口方向",m:"推免直博生（联培）",d:64,dir:["bme","other"],x:"脑机接口",inst:"new",r:"jsz",com:"弱",pref:["lab","eng"],pf:"优营可申请联培直博的新兴机构",gate:"27届通知：四级；推荐信1封；优秀营员获推免资格后可申请联培直博",exam:"材料审核＋营期考核",rk:null,zb:1},
+{s:"中国科学院大学 脑科学与智能技术卓越创新中心",c:"——",m:"神经科学/认知科学（学硕/直博）",d:58,dir:["bme"],x:"脑机接口",inst:"cas",r:"bj",com:"中",pref:["lab","paper"],pf:"交叉欢迎计算机/自动化背景的脑科学口",gate:"27届通知：专业含计算机/自动化/电子等；英语四级或六级",exam:"推免面试（7月8–9日）＋9月二轮",rk:null,zb:1},
+/* —— 其他工科 other —— */
+{s:"北京中关村学院",c:"——",m:"人工智能 直博（31所共建高校专项）",d:70,dir:["other","cs"],x:"人工智能",inst:"new",r:"bj",com:"弱",pref:["algo","eng","paper"],pf:"院长面试找“天偏怪才”＋代码机试的直博营",gate:"27届通知：代码机试（C/C++/Java/Python）；优营仍须通过共建高校考核",exam:"院长面试＋代码机试＋个人面试",rk:null,zb:1},
+{s:"深圳零一学院",c:"微纳与智造学域",m:"力学/材料/机械/电子信息/微电子相关（2027届）",d:64,dir:["other","me","ee"],x:"智能制造",inst:"new",r:"gs",com:"中",pref:["eng","lab"],pf:"清华钱班体系的新型学院、择优约50人",gate:"27届口径：择优约50人；学业综合排名靠前、有望获推免者优先",exam:"材料审核择优＋营期",rk:null,zb:0},
+{s:"中国科学院大学 合肥物质科学研究院（科学岛）",c:"——",m:"计算机/仪器/电气/光学相关（学硕/专硕/直博）",d:55,dir:["other","cs","pe"],x:"",inst:"cas",r:"ot",com:"弱",pref:["eng","lab"],pf:"夏令营300人大营、预推免9月下旬的友好口",gate:"27届通知：预推免为独立批次；专业含计算机技术/软件/控制/电气等",exam:"审核通过后参加分院面试",rk:null,zb:1},
+{s:"西湖大学",c:"工学院",m:"人工智能/生物医药工程等方向（学硕/直博）",d:72,dir:["other","cs","bme"],x:"人工智能",inst:"u",r:"jsz",com:"弱",pref:["paper","lab"],pf:"小而精研究型大学、导师制",gate:"27届详情页缺失：门槛以官网当年简章为准（留空自查）",exam:"导师考核＋面试（以当年简章为准）",rk:null,zb:1},
+{s:"深圳理工大学",c:"——",m:"计算机/生物医学工程等（学硕/专硕）",d:56,dir:["other","cs","bme"],x:"",inst:"u",r:"gs",com:"中",pref:["rank","eng"],pf:"新建研究型大学、深圳大学学籍联培",gate:"27届通知：在深圳大学推免预报名系统报名；学籍属深圳大学",exam:"按深大章程审核选拔",rk:null,zb:0},
+{s:"北京科技大学",c:"高精尖学院",m:"材料＋人工智能交叉/计算机技术（专硕）",d:57,dir:["other","cs"],x:"人工智能",inst:"u",r:"bj",com:"强",pref:["rank","eng"],pf:"“材料＋AI”交叉、夏令营前25%的口子",gate:"27届通知：夏令营前3年综合排名前25%",exam:"预推免线下复试（专业能力＋综合素质＋外语）",rk:null,zb:0},
+{s:"长安大学",c:"信息工程学院",m:"计算机科学与技术（直博）/交通信息工程（学硕/专硕）",d:52,dir:["other","cs"],x:"",inst:"u",r:"ot",com:"中",pref:["rank","eng"],pf:"公路交通背景的信息学院、直博通道明确",gate:"27届通知：预推免系统预报名；直博需2份专家推荐书",exam:"面试专家组面试",rk:null,zb:1},
+{s:"中国科学院大学 前沿交叉科学学院",c:"——",m:"AI/集成电路/量子科技/脑机接口等六方向（直博）",d:72,dir:["other","cs","ee","bme"],x:"人工智能",inst:"cas",r:"bj",com:"强",pref:["paper","rank"],pf:"六方向2000人大营、直博笔试＋面试",gate:"27届通知：直博笔试=数学基础＋专业基础",exam:"笔试＋面试",rk:null,zb:1},
+{s:"军事科学院",c:"——",m:"计算机科学与技术/控制科学与工程等（无军籍地方生，学硕/直博）",d:58,dir:["other","cs","auto"],x:"",inst:"cas",r:"bj",com:"强",pref:["rank","eng"],pf:"无军籍通道明确、面试去最高最低取平均",gate:"27届口径：面试≥20分钟、<60分不录取；拟录取24小时内确认",exam:"材料审核＋面试（可加笔试/机试）",rk:null,zb:1}
+];
+
+/* ════════════════════════════════════════════════════════════
+   数据区三 · 文案模板与映射（改话术只动这里）
+════════════════════════════════════════════════════════════ */
+const BADGE_LINE="由排名、科研、竞赛、英语、交叉五维加权得出";
+const BADGE_TXT={S:"硬件扎实，冲的区域能看到头部院校的门。",A:"结构健康，冲稳之间有好几条路能走。",B:"底子在，短板明确，补一块就上一层。",C:"位置偏保守，先保住，再把能改的一块块抬起来。",D:"别慌，你的大部分分值都在可改变量里，先从最短路径动手。"};
+const KING={S:"高处不远，就差最后一脚。",A:"你的牌面，够打两局。",B:"短板清楚的人，跑得最快。",C:"先保住，再往上够。",D:"改得动的，都来得及。"};
+const AXIS_INFO={
+ a1:"院校层次：由第 1 题（本科院校层次）决定——已不可改变；但交叉线可以借力（见第 3 题）。",
+ a2:"专业排名：由第 5 题（排名百分位）定基础，第 6 题（核心课低分）扣分，第 4 题（资格状态）修正——可改变量。",
+ a3:"科研产出：由第 7 题（科研形式）打底，第 8/9/10 题（论文层次、相关性、位次）定上限——已出结果的是存量，新课题和新成果是增量。",
+ a4:"竞赛含金量：由第 11 题（类型）与第 12 题（奖项层级）决定——算法类与一类赛事权重最高，随时可以新报。",
+ a5:"英语：本版未单独设题，按同类背景中性值计（60）；各校英语硬线（常见 425 / 450 / 460 / 480 分层）请对照目标院校当年简章自查。",
+ a6:"交叉与工程经历：由第 3 题（交叉接受度）与第 13 题（筹码多选）共同决定——实习、开源、上线项目都是可攒的。"};
+const CROSS_MAP={
+ cs:["人工智能","网络空间安全","数据科学","医学影像AI"],se:["人工智能","数据科学","网络空间安全","医学影像AI"],
+ ee:["集成电路","智能感知","光电信息"],comm:["集成电路","智能感知","空天信息"],
+ auto:["智能机器人与无人系统","控制与AI交叉"],me:["智能制造","机器人工程","工业软件与数字孪生"],
+ pe:["储能科学与工程","智慧能源","碳中和相关"],bme:["生物信息","医学影像AI","计算生物学","脑机接口"],
+ other:["人工智能与AI for Science","低空技术与工程","集成电路（以当年目录为准）"]};
+const CROSS_ADV={"人工智能":"跨背景被鼓励","数据科学":"跨背景被鼓励","网络空间安全":"竞争者更少","集成电路":"跨背景被鼓励","智能感知":"竞争者更少","光电信息":"竞争者更少","空天信息":"竞争者更少","智能机器人与无人系统":"跨背景被鼓励","控制与AI交叉":"跨背景被鼓励","智能制造":"竞争者更少","机器人工程":"竞争者更少","工业软件与数字孪生":"竞争者更少","储能科学与工程":"跨背景被鼓励","智慧能源":"跨背景被鼓励","碳中和相关":"跨背景被鼓励","生物信息":"对论文数量要求相对宽松","医学影像AI":"竞争者更少","计算生物学":"对论文数量要求相对宽松","脑机接口":"对论文数量要求相对宽松","人工智能与AI for Science":"跨背景被鼓励","低空技术与工程":"竞争者更少"};
+const STAGE_NODE={y2:"大三上开学前",y3a:"本学期内（明年5月夏令营报名前）",y3b:"4月底（夏令营报名开放前）",y4:"9月预推免系统开放前"};
+const DIM_NAME={a1:"院校层次",a2:"专业排名",a3:"科研产出",a4:"竞赛含金量",a5:"英语",a6:"交叉与工程经历"};
+
+/* ═══════════════ 数据区四 · 激活码（新增激活码：把新 hash 加进数组即可，明码清单在卖家手里） ═══════════════ */
+const CODE_HASHES=[582675061,3247271511,110998084,3461933379,2849347618,3083182675,2900111976,4204549634,324320402,177766089,3524540865,3251435539,575750871,1483051265,1243188561,1779635815,4261126073,151985600,774349264,3904773548,2052614137,3581632153,3110816566,4231010799,3889290788,2533841053,886578081,1380340565,1057751232,2750894715,731043934,1506454503,1000760957,1922919035,194628318,3276323898,3101828512,398185286,1330171049,2875057381,1762773235,1391099259,1657171454,3764959340,2559955795,2523893729,2309276830,3290131383,3874426950,2445653189,3888131256,3882009664,451420288,4286368921,3008597775,921564298,3953151014,3966798129,2552671684,2422546617];
+function codeHash(s){let h=5381;s=(s||"").trim().toUpperCase();for(let i=0;i<s.length;i++){h=(((h<<5)+h)+s.charCodeAt(i))>>>0;}return h;}
+function initGate(){
+  let ok=false;try{ok=localStorage.getItem("byby_ok")==="1";}catch(e){}
+  if(ok){$("home").classList.add("on");return;}
+  $("gate").classList.add("on");
+}
+$("codeBtn").onclick=()=>{
+  const v=$("codeInput").value.trim();
+  if(!v){$("codeMsg").textContent="先输入激活码。";return;}
+  if(CODE_HASHES.includes(codeHash(v))){
+    try{localStorage.setItem("byby_ok","1");}catch(e){}
+    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
+    $("home").classList.add("on");window.scrollTo(0,0);
+  }else{
+    $("codeMsg").textContent="激活码不对：核对格式 BY-XXXX-XXXX（区分大小写会自动转大写），或联系卖家。";
+  }
+};
+
+/* ═══════════════ 运行区 ═══════════════ */
+let S={a:{},idx:0,calcDone:false};
+const $=id=>document.getElementById(id);
+function optLabel(qid,k){if(k==="__unsure")return "不确定";if(k==="__skip")return "跳过";const q=QUESTIONS.find(q=>q.id===qid);const o=q.o.find(o=>o[0]===k);return o?o[1]:k;}
+function ans(qid){return S.a[qid];}
+function skipped(qid){return S.a[qid]==="__skip";}
+function unsure(qid){return S.a[qid]==="__unsure";}
+function eff(qid){const v=S.a[qid];return (v===undefined||v==="__skip")?null:v;}
+
+/* —— 计分（每次结果页都从当前答案整体重算，不累加）—— */
+function compute(){
+  const g=q=>{const v=eff(q);if(v===null)return null;const Q=QUESTIONS.find(x=>x.id===q);const o=Q.o.find(o=>o[0]===v);return o?o[2]:null;};
+  const dir=(eff(2)&&eff(2)!=="__unsure")?g(2):"cs";
+  const D1=(g(1)===null)?60:g(1);
+  let D2=(g(5)===null)?45:g(5);
+  const q4=g(4);if(q4!==null&&q4!=="BRANCH")D2+=q4;
+  const q6=g(6);if(q6!==null)D2+=q6;
+  D2=Math.max(0,Math.min(100,D2));
+  const q7=(g(7)===null)?30:g(7);
+  const ps=(g(8)===null)?0:g(8);
+  const rel=(g(9)===null)?1:g(9);
+  const auth=(g(10)===null)?0.6:g(10);
+  const D3=Math.max(0,Math.min(100,q7+ps*rel*auth));
+  const coeff=(g(11)===null)?0.6:g(11);
+  const award=(g(12)===null)?0:g(12);
+  const D4=Math.max(0,Math.min(100,award*coeff));
+  const D5=60;
+  const q3=(g(3)===null)?55:g(3);
+  let eng=0;const a13=ans(13);
+  if(Array.isArray(a13)&&!a13.includes("__skip")){a13.forEach(k=>{if(k==="__unsure")return;const o=QUESTIONS.find(x=>x.id===13).o.find(o=>o[0]===k);if(o)eng+=o[2];});}
+  eng=Math.min(100,eng);
+  const D6=Math.round(0.4*q3+0.6*eng);
+  const T=0.25*D2+0.20*D1+0.20*D3+0.12*D4+0.10*D5+0.13*D6;
+  let tier=T>=84?"S":T>=72?"A":T>=52?"B":T>=40?"C":"D";
+  const crossOK=eff(3)==="acc";
+  const lowGrade=(g(6)===-10||g(6)===-12);
+  const noQual=eff(4)==="no";
+  const edge=(eff(4)==="edge");
+  return {D:{a1:D1,a2:D2,a3:D3,a4:D4,a5:D5,a6:D6},T,tier,dir,crossOK,lowGrade,noQual,edge,
+    q4g:g(4),q6g:g(6),ps,rel,auth,q7v:q7};
+}
+function userPct(){const v=eff(5);if(v===null)return null;const m={"p5":5,"p15":15,"p30":30,"p50":50,"p70":70,"unk":null};return m[v];}
+function chips(){
+  const c=compute();const ch={};
+  ch.rank=(!skipped(5))&&(c.D.a2>=72);
+  ch.paper=c.ps>=19&&!skipped(8)&&eff(8)!=="__unsure";
+  ch.lab=[45,58,70].includes(c.q7v)&&!skipped(7);
+  ch.algo=["c1a","c2a"].includes(eff(11))&&["g1","g23","p1"].includes(eff(12));
+  const a13=ans(13);ch.eng=Array.isArray(a13)&&a13.some(k=>["intern","oss","demo","lead"].includes(k));
+  ch.cross=c.crossOK;
+  return ch;
+}
+function fit(e,ch,c){
+  let f=0;e.pref.forEach(k=>{if(ch[k])f++;});
+  if(eff(16)==="zhibo"&&e.zb)f++;
+  if(eff(17)==="phd"&&e.zb)f++;
+  if(["pos","met"].includes(eff(14))&&e.com==="弱")f++;
+  if(e.x&&c.crossOK)f++;
+  return f;
+}
+function citeFor(key){
+  switch(key){
+    case "rank":return skipped(5)?null:"〔第5题・"+optLabel(5,eff(5)||"__unsure")+"〕";
+    case "paper":return (eff(8)&&eff(8)!=="none"&&!skipped(8))?"〔第8题・"+optLabel(8,eff(8))+"〕":null;
+    case "lab":return (eff(7)&&!["none"].includes(eff(7))&&!skipped(7))?"〔第7题・"+optLabel(7,eff(7))+"〕":null;
+    case "algo":return (eff(12)&&!["none","sch"].includes(eff(12))&&!skipped(12))?"〔第12题・"+optLabel(12,eff(12))+"〕":((eff(11)&&!["none"].includes(eff(11))&&!skipped(11))?"〔第11题・"+optLabel(11,eff(11))+"〕":null);
+    case "eng":{const a13=ans(13);if(!Array.isArray(a13))return null;const k=a13.find(x=>["intern","oss","demo","lead"].includes(x));return k?"〔第13题・"+optLabel(13,k)+"〕":null;}
+    case "cross":return eff(3)==="acc"?"〔第3题・接受〕":null;
+    case "dir":return (eff(2)&&!skipped(2))?"〔第2题・"+optLabel(2,eff(2))+"〕":null;
+  }
+  return null;
+}
+function match(){
+  const c=compute();const ch=chips();
+  const pct=userPct();
+  let pool=LIB.filter(e=>{
+    if(!e.dir.includes(c.dir))return false;
+    const a15=ans(15);const regs=Array.isArray(a15)?a15.filter(k=>k!=="__unsure"&&k!=="__skip"):[];
+    if(regs.length&&!regs.includes("any")&&!regs.includes(e.r))return false;
+    const casAns=S.a.cas||"nth";if(casAns==="no"&&e.inst==="cas")return false;
+    const newAns=S.a.inst||"nth";if(newAns==="no"&&e.inst==="new")return false;
+    if(e.rk&&pct!==null){const miss=pct-e.rk;if(miss>10)return false;}
+    return true;
+  });
+  const band=(lo,hi)=>pool.filter(e=>e.d>=lo&&e.d<=hi);
+  function pick(tgt,n,mode){
+    let out=[];
+    for(const pad of [0,4,8]){
+      const arr=pool.filter(e=>Math.abs(e.d-tgt)<=8+pad)
+        .map(e=>({e,f:fit(e,ch,c)}))
+        .filter(x=>{const miss=pct!==null&&x.e.rk?pct-x.e.rk:0;return mode==="chong"?miss<=0:miss<=10;});
+      arr.sort((a,b)=>(b.f-a.f)||(Math.abs(a.e.d-tgt)-Math.abs(b.e.d-tgt)));
+      out=arr.slice(0,n).map(x=>x.e);
+      if(out.length>=n)break;
+    }
+    if(out.length<n){const rest=pool.filter(e=>!out.includes(e)).map(e=>({e,f:fit(e,ch,c)})).sort((a,b)=>(b.f-a.f)||(Math.abs(a.e.d-tgt)-Math.abs(b.e.d-tgt)));
+      out=out.concat(rest.slice(0,n-out.length).map(x=>x.e));}
+    return out;
+  }
+  const chongN=c.lowGrade?2:(3+(c.crossOK?1:0)+(pool.filter(e=>Math.abs(e.d-(c.T+13))<=10&&fit(e,ch,c)>=2).length>=3?1:0));
+  const cap=n=>Math.min(n,5);
+  const chong=pick(c.T+13,cap(chongN),"chong");
+  const wen=pick(c.T-0.5,c.lowGrade?4:3,"wen");
+  const bao=pick(c.T-13,3,"bao");
+  return {pool,chong,wen,bao,c,chongN:cap(chongN)};
+}
+function crossList(){
+  const c=compute();const names=CROSS_MAP[c.dir]||[];
+  const ch=chips();
+  const items=[];
+  names.forEach(nm=>{
+    const ex=LIB.find(e=>e.x===nm&&e.dir.includes(c.dir))||LIB.find(e=>e.x===nm);
+    const adv=CROSS_ADV[nm]||"竞争者更少";
+    const cits=[];
+    if(c.crossOK)cits.push("〔第3题・接受〕");
+    if(ch.paper)cits.push(citeFor("paper"));else if(ch.lab)cits.push(citeFor("lab"));
+    if(ch.eng)cits.push(citeFor("eng"));else if(ch.algo)cits.push(citeFor("algo"));
+    const cs=cits.filter(Boolean).slice(0,2);
+    const whyTxt=(cs.length>=2)?("你在"+cs[0]+"和"+cs[1]+"上有实物，这类方向更看匹配度而非单一指标。")
+      :("你选了〔第3题・接受〕，愿意跨出去本身就是这类方向最看重的第一步。");
+    items.push({nm,adv,why:whyTxt,ex:ex?(ex.s+" · "+ex.c+" · "+ex.m):null});
+  });
+  return items.slice(0,3);
+}
+function gapOf(e){
+  const v14=eff(14);
+  if(["none","sent"].includes(v14)&&(e.com==="弱"||e.com==="中"))return {k:"taoci",cite:"〔第14题・"+optLabel(14,v14)+"〕"};
+  const v12=eff(12),v11=eff(11);
+  if(["none","sch"].includes(v12)&&!skipped(12))return {k:"award",cite:"〔第12题・"+optLabel(12,v12)+"〕"};
+  if(["none","unk"].includes(v11)&&!skipped(11))return {k:"algo",cite:"〔第11题・"+optLabel(11,v11)+"〕"};
+  const a13=ans(13);const hasEng=Array.isArray(a13)&&a13.some(k=>["intern","oss","demo","lead"].includes(k));
+  if(!hasEng&&(a13===undefined||a13.includes("none")||a13==="__skip"||a13==="__unsure"))return {k:"eng",cite:"〔第13题・"+(a13&&a13.includes("none")?"都没有":"未填有效筹码")+"〕"};
+  const c=compute();
+  return {k:"live",cite:"〔第18题・"+(eff(18)?optLabel(18,eff(18)):"大三下")+"〕",exam:e.exam};
+}
+function fixText(e,gap){
+  const st=eff(18)&&eff(18)!=="__unsure"?eff(18):(eff(18)==="__unsure"?"__u":null);
+  const node=STAGE_NODE[st&&st!=="__u"?st:"y3b"];
+  const pre="在"+node+"前";
+  if(gap.k==="taoci")return pre+"，每周给两位目标导师发带项目链接的邮件"+(e.com==="弱"?"——这所学院是导师制，导师点头才能进面。":"——导师的正面回复能显著提高入营概率。");
+  if(gap.k==="award"||gap.k==="algo")return pre+"报一个算法类赛事（蓝桥杯/CCPC/校赛都行），拿到一个能写进简历的奖项，这条短板就能补平。";
+  if(gap.k==="eng")return pre+"把手上的项目推上线：部署＋README＋三张截图，简历里就能从“熟悉”变成“可演示”。";
+  const isJi=e.exam.includes("机试")||e.exam.includes("机考")||e.exam.includes("上机");
+  return pre+"按它的考核方式练："+(isJi?"每天 1–2 道中等难度编程题，把机试手感练稳。":"3 分钟中英文自我介绍＋项目追问，各过 3 遍。");
+}
+function whyText(e,tierName){
+  const order=["rank","paper","lab","algo","eng","cross"];
+  let cits=[];
+  e.pref.forEach(k=>{const c=citeFor(k);if(c&&!cits.includes(c))cits.push(c);});
+  order.forEach(k=>{const c=citeFor(k);if(c&&!cits.includes(c))cits.push(c);});
+  const d=citeFor("dir");if(d&&!cits.includes(d))cits.push(d);
+  cits=cits.slice(0,2);
+  if(cits.length<2){const fb="〔第2题・"+optLabel(2,eff(2)||"cs")+"〕";if(!cits.includes(fb))cits.push(fb);}
+  return "你的"+cits[0]+"加"+cits[1]+"，正对上"+e.pf+"，所以放在"+tierName+"区。";
+}
+
+/* —— 渲染：答题 —— */
+function buildQuiz(){
+  const st=$("qstage");st.innerHTML="";
+  QUESTIONS.forEach((q,qi)=>{
+    const d=document.createElement("div");d.className="slide";d.id="slide"+qi;
+    let html="<h2 class='qtitle'>"+q.t+"</h2>";
+    if(q.n)html+="<div class='qnote'>💡 "+q.n+"</div>";
+    html+="<div class='opts'>";
+    q.o.forEach(o=>{html+="<button class='opt' data-q='"+q.id+"' data-k='"+o[0]+"'>"+o[1]+"</button>";});
+    html+="</div>";
+    if(q.id===15){
+      html+="<div class='subq'><div class='st'>小问① 是否接受中科院及各研究所？</div><div class='mini-row' data-sub='cas'>"+
+        [["yes","接受"],["no","不考虑"],["nth","没想过"]].map(o=>"<button class='mini' data-k='"+o[0]+"'>"+o[1]+"</button>").join("")+"</div>";
+      html+="<div class='st' style='margin-top:12px'>小问② 是否接受新型研究机构或企业联合培养？</div><div class='mini-row' data-sub='inst'>"+
+        [["yes","接受"],["no","不考虑"],["nth","没想过"]].map(o=>"<button class='mini' data-k='"+o[0]+"'>"+o[1]+"</button>").join("")+"</div></div>";
+    }
+    html+="<div class='aids'><button data-aid='unsure' data-q='"+q.id+"'>不确定</button><button data-aid='skip' data-q='"+q.id+"'>跳过</button></div>";
+    html+="<div class='qnav'><button class='btn ghost' data-nav='prev' "+(qi===0?"style='visibility:hidden'":"")+">← 上一题</button>"+
+      "<button class='btn main' data-nav='next'>"+(qi===QUESTIONS.length-1?"生成定位 →":"下一题 →")+"</button></div>";
+    d.innerHTML=html;st.appendChild(d);
+  });
+  st.addEventListener("click",onQuizClick);
+}
+function answered(q){
+  const v=S.a[q.id];
+  if(v==="__unsure"||v==="__skip")return true;
+  if(q.type==="m15")return (Array.isArray(S.a[15])&&S.a[15].length>0)||v==="__unsure"||v==="__skip";
+  if(q.type==="m")return Array.isArray(v)&&v.length>0;
+  return v!==undefined;
+}
+function paintSlide(qi){
+  const q=QUESTIONS[qi];const d=$("slide"+qi);
+  d.querySelectorAll(".opt").forEach(b=>{
+    const k=b.dataset.k;const v=S.a[q.id];
+    const sel=(q.type==="m"||q.type==="m15")?(Array.isArray(v)&&v.includes(k)):v===k;
+    b.classList.toggle("sel",sel);
+  });
+  d.querySelectorAll(".mini").forEach(b=>{
+    const sub=b.closest(".mini-row").dataset.sub;
+    b.classList.toggle("sel",(S.a[sub]||"nth")===b.dataset.k);
+  });
+  d.querySelectorAll(".aids button").forEach(b=>{
+    const aid=b.dataset.aid;
+    b.classList.toggle("sel",S.a[q.id]===(aid==="unsure"?"__unsure":"__skip"));
+  });
+  const nb=d.querySelector("[data-nav='next']");
+  nb.disabled=!answered(q);
+  $("qNum").textContent="第 "+(qi+1)+" / 18 题";
+  $("qGroup").textContent=GROUPS[q.g];
+  $("pfill").style.width=Math.round((qi+1)/18*100)+"%";
+}
+function show(qi){
+  const cur=document.querySelector(".slide.cur");
+  const nxt=$("slide"+qi);
+  if(cur&&cur!==nxt){cur.classList.remove("cur");cur.classList.add("left");}
+  nxt.classList.remove("left");void nxt.offsetWidth;nxt.classList.add("cur");
+  S.idx=qi;paintSlide(qi);
+}
+function onQuizClick(ev){
+  const t=ev.target.closest("button");if(!t)return;
+  if(t.dataset.q&&t.classList.contains("opt")){
+    const qid=+t.dataset.q,k=t.dataset.k;const q=QUESTIONS.find(x=>x.id===qid);
+    if(q.type==="m"||q.type==="m15"){
+      let arr=Array.isArray(S.a[qid])?S.a[qid].slice():[];
+      if(k==="none"||(q.type==="m15"&&k==="any")){arr=arr.includes(k)?[]:[k];}
+      else{arr=arr.filter(x=>x!=="none"&&x!=="any"&&x!=="__unsure"&&x!=="__skip");arr.includes(k)?arr=arr.filter(x=>x!==k):arr.push(k);}
+      S.a[qid]=arr;
+    }else{
+      if(S.a[qid]===k)delete S.a[qid];else S.a[qid]=k;
+      if(qid===13&&S.a[13]===undefined)S.a[13]=[];
+    }
+    paintSlide(S.idx);return;
+  }
+  if(t.closest(".mini-row")){
+    const sub=t.closest(".mini-row").dataset.sub;
+    S.a[sub]=t.dataset.k;paintSlide(S.idx);return;
+  }
+  if(t.dataset.aid){
+    const qid=+t.dataset.q;const key=t.dataset.aid==="unsure"?"__unsure":"__skip";
+    S.a[qid]=S.a[qid]===key?undefined:key;
+    if(qid===13&&S.a[13]===undefined)S.a[13]=[];
+    paintSlide(S.idx);return;
+  }
+  if(t.dataset.nav==="prev"){if(S.idx>0)show(S.idx-1);return;}
+  if(t.dataset.nav==="next"){
+    if(!answered(QUESTIONS[S.idx]))return;
+    if(S.idx===5){openModal(0);return;}
+    if(S.idx===11){openModal(1);return;}
+    if(S.idx===QUESTIONS.length-1){startCalc();return;}
+    show(S.idx+1);
+  }
+}
+function openModal(which){
+  const cfg=which===0?{e:"🧭",t:"基础信息问完了，剩下都是加分项。",s:"科研、竞赛、筹码——这半程的每一分都还能挣。"}
+                     :{e:"🏁",t:"最后 6 题，答完直接出结果。",s:"偏好与阶段不加分，但决定你的名单长什么样。"};
+  $("mEmoji").textContent=cfg.e;$("mTitle").textContent=cfg.t;$("mSub").textContent=cfg.s;
+  $("modal").classList.add("on");
+  $("mOk").onclick=()=>{$("modal").classList.remove("on");show(S.idx+1);};
+}
+function startCalc(){
+  $("calc").classList.add("on");
+  const c=compute();
+  const dirName=optLabel(2,c.dir)||"计算机";
+  const lines=["正在读你的六维背景","正在比对"+dirName+"方向的推免接收记录",
+    c.crossOK?"正在校验交叉院系的可投范围":"正在按地区与学位意向微调",
+    "正在把「改不了」和「来得及」分开","正在生成你的冲稳保名单"];
+  let i=0;$("calcLine").textContent=lines[0];
+  const timer=setInterval(()=>{i++;if(i>=lines.length){clearInterval(timer);setTimeout(()=>{$("calc").classList.remove("on");renderResult();},350);return;}
+    const el=$("calcLine");el.style.opacity=0;setTimeout(()=>{el.textContent=lines[i];el.style.opacity=1;},180);},600);
+}
+
+/* —— 渲染：结果 —— */
+function esc(s){return s;}
+function renderResult(){
+  const c=compute();const R=$("result");R.innerHTML="";
+  document.querySelectorAll(".screen").forEach(s=>{if(s.id!=="result")s.classList.remove("on");});
+  R.classList.add("on");window.scrollTo(0,0);
+  const wrap=document.createElement("div");wrap.className="screen on";
+  let html="";
+  /* 模块三·风险提示（第4题边缘） */
+  if(c.edge)html+="<div class='banner warn'>⚠️ 你的推免资格还在卡线（〔第4题・排名卡线在边缘〕）：名单照常给你，但批次策略变重要——夏令营批次敢冲、预推免批次求稳，两头都投。</div>";
+  if(c.noQual){wrap.innerHTML=noQualHTML();R.appendChild(wrap);bindResult();return;}
+  const M=match();
+  /* 模块七·本次调整 */
+  const adj=[];
+  if(c.lowGrade)adj.push("因为你填了〔第6题・"+optLabel(6,eff(6))+"〕，部分院校初筛会卡核心课成绩，所以冲档 3→2，1 个名额转入稳档。");
+  if(c.crossOK)adj.push("因为〔第3题・接受〕，冲档整体上浮半档，另单列交叉院系清单。");
+  if(M.chong.length>3)adj.push("冲档按契合度给足 "+M.chong.length+" 所（依据："+(citeFor("rank")||citeFor("paper")||citeFor("dir"))+"）。");
+  if(adj.length)html+="<div class='banner adj'><b>本次调整</b><br>"+adj.join("<br>")+"</div>";
+  /* 模块一·温和解读 */
+  html+="<div class='card'>"+decodeText(c)+"</div>";
+  /* 模块二·档位徽章 */
+  html+="<div class='card' style='text-align:center'><div class='badge "+c.tier+"'>"+c.tier+"</div>"+
+    "<p style='margin-top:8px;font-weight:700'>"+BADGE_TXT[c.tier]+"</p>"+
+    "<p class='small'>"+BADGE_LINE+"（综合 "+Math.round(c.T)+" 分）</p></div>";
+  /* 模块三·六维雷达 */
+  html+="<div class='card'><h3 style='text-align:center;margin-bottom:6px'>六维 bg 雷达</h3><div class='radar-wrap'>"+radarSVG(c.D)+"<div class='radar-tip' id='radarTip'>点雷达上的维度名，看它由哪道题决定</div></div></div>";
+  /* 模块四~六·冲稳保 */
+  const tiers=[["冲","chong",M.chong],["稳","wen",M.wen],["保","bao",M.bao]];
+  tiers.forEach(t=>{
+    html+="<div class='tier-h'><span class='tt'>"+t[0]+"档 · "+t[2].length+" 所</span><span class='line'></span></div>";
+    if(!t[2].length)html+="<div class='banner adj'>这一档在你的条件下没有凑出足够的院校——按「宁可少给，不凑数」原则留空，建议以第 15 题地区限定与第 5 题排名硬线回查。</div>";
+    t[2].forEach(e=>{html+=schoolCard(e,t[0]);});
+  });
+  /* 模块八·交叉清单 */
+  if(c.crossOK){
+    const cl=crossList();
+    html+="<div class='tier-h'><span class='tt'>🔁 交叉可投清单</span><span class='line'></span></div>";
+    cl.forEach(it=>{
+      html+="<div class='scard'><div class='sname'>🧪 "+it.nm+"</div>"+
+      "<div class='srow'><span class='lbl'>为什么适合你</span>"+it.why+"</div>"+
+      "<div class='srow'><span class='lbl'>相比本方向</span>"+it.adv+"——这一条的依据是方向属性，不是承诺。"+(it.ex?("可投示例："+it.ex):"")+"</div></div>";
+    });
+  }else if(eff(3)==="only"){
+    html+="<div class='banner pinkb'>若愿意放开交叉（〔第3题・只接受本方向〕），可触达的层次通常会往上抬半档。</div>";
+  }
+  /* 模块九·填报建议 */
+  html+="<div class='card'><h3>📝 填报建议</h3><ul class='tips'>"+suggestList(c,M).map(s=>"<li class='tip'>"+s+"</li>").join("")+"</ul></div>";
+  /* 模块十·需要留意 */
+  html+="<div class='card'><h3>👀 需要留意</h3><ul class='tips'>"+watchList(c).map(s=>"<li class='tip'>"+s+"</li>").join("")+"</ul></div>";
+  /* 金句 */
+  html+="<div class='king'>「"+KING[c.tier]+"」</div>";
+  /* 解锁区 */
+  html+=unlockHTML(M,c);
+  html+="<div class='foot'><button class='btn ghost' id='redoBtn'>🔄 重新测试</button>"+
+    "<p class='small' style='margin-top:10px'>原创趣味设定，仅供娱乐与自我观察<br>院校信息为公开口径整理（第四轮学科评估/官方通知/2024实战记录），投递以当年招生简章为准</p></div>";
+  wrap.innerHTML=html;R.appendChild(wrap);
+  bindResult();
+}
+function decodeText(c){
+  const lv=eff(1)?optLabel(1,eff(1)):"（未填层次）";
+  const dn=optLabel(2,c.dir);
+  const rk=eff(5)?optLabel(5,eff(5)):"（未填排名）";
+  let p1="你现在的位置："+lv+"读"+dn+"，排名"+rk+"。";
+  if(c.edge)p1+="推免资格还在卡线。";
+  const dims=[["a1",c.D.a1,eff(1)&&eff(1)!=="__unsure"?"〔第1题・"+optLabel(1,eff(1))+"〕":null],
+    ["a2",c.D.a2,eff(5)&&eff(5)!=="__unsure"?"〔第5题・"+optLabel(5,eff(5))+"〕":null],
+    ["a3",c.D.a3,(eff(8)&&eff(8)!=="none"&&!skipped(8))?"〔第8题・"+optLabel(8,eff(8))+"〕":((eff(7)&&!skipped(7))?"〔第7题・"+optLabel(7,eff(7))+"〕":null)],
+    ["a4",c.D.a4,(eff(12)&&!skipped(12))?"〔第12题・"+optLabel(12,eff(12))+"〕":null],
+    ["a6",c.D.a6,(eff(13)&&Array.isArray(ans(13))&&ans(13).length&&!ans(13).includes("none"))?"〔第13题・"+optLabel(13,ans(13)[0])+"〕":null]];
+  dims.sort((a,b)=>b[1]-a[1]);
+  const top=dims[0];
+  let p2="六维里最硬的一块是"+DIM_NAME[top[0]]+(top[2]?"——来自"+top[2]:"")+"。";
+  let p3="";
+  if(c.crossOK)p3="接下来最划算的动作：把最弱的可改变量往上一抬；交叉线已经单独给你开了一列，先投它。";
+  else{const w=["a4","a6","a3"].sort((a,b)=>c.D[a]-c.D[b])[0];
+    p3="接下来最划算的动作：把"+DIM_NAME[w]+"往上一抬，你的冲档名单就会变样子。";}
+  return "<h2>🌱 温和解读</h2><p style='margin-top:8px'>"+p1+p2+p3+"</p>";
+}
+function radarSVG(D){
+  const cx=150,cy=128,R=92;const keys=["a1","a2","a3","a4","a5","a6"];
+  const names=["院校层次","专业排名","科研产出","竞赛含金量","英语","交叉工程"];
+  const pt=(i,r)=>{const ang=-Math.PI/2+i*Math.PI/3;return [cx+r*Math.cos(ang),cy+r*Math.sin(ang)];};
+  let grid="";[0.25,0.5,0.75,1].forEach(f=>{const p=keys.map((k,i)=>pt(i,R*f).map(v=>v.toFixed(1)).join(",")).join(" ");grid+="<polygon points='"+p+"' fill='none' stroke='#E8DCC6' stroke-width='1'/>";});
+  let axes="";keys.forEach((k,i)=>{const p=pt(i,R);axes+="<line x1='"+cx+"' y1='"+cy+"' x2='"+p[0].toFixed(1)+"' y2='"+p[1].toFixed(1)+"' stroke='#E8DCC6'/>";});
+  const poly=keys.map((k,i)=>pt(i,R*Math.max(6,D[k])/100).map(v=>v.toFixed(1)).join(",")).join(" ");
+  let labels="";keys.forEach((k,i)=>{const p=pt(i,R+18);
+    labels+="<text class='axis' data-axis='"+k+"' x='"+p[0].toFixed(1)+"' y='"+(p[1]+4).toFixed(1)+"' text-anchor='middle' font-size='11.5' fill='#1E3A2C' font-weight='700'>"+names[i]+" "+D[k]+"</text>";});
+  return "<svg viewBox='0 0 300 262' width='300' height='262'>"+grid+axes+
+    "<polygon points='"+poly+"' fill='rgba(47,107,79,.22)' stroke='#2F6B4F' stroke-width='2'/>"+
+    keys.map((k,i)=>{const p=pt(i,R*Math.max(6,D[k])/100);return "<circle cx='"+p[0].toFixed(1)+"' cy='"+p[1].toFixed(1)+"' r='3.5' fill='#2F6B4F'/>";}).join("")+
+    labels+"</svg>";
+}
+function schoolCard(e,tierName){
+  const why=whyText(e,tierName);
+  const gap=gapOf(e);
+  const lack="按这类院校的接收画像，你还缺"+gap.cite+(gap.k==="taoci"?"——这里是"+(e.com==="弱"?"导师制/弱com":"半弱com")+"，导师点头比多一个奖项更管用，其余条件已经够线。":(gap.k==="live"?"——剩下的变量是考核当天的临场发挥（"+e.exam+"）。":"，其余条件已经够线。"));
+  const fix="今年怎么补："+fixText(e,gap);
+  const dep1=citeFor("rank")||"〔第2题・"+optLabel(2,eff(2)||"cs")+"〕";
+  const dep2=citeFor(e.pref.find(k=>citeFor(k))||"dir")||dep1;
+  return "<div class='scard'><div class='sname'>"+e.s+"</div><div class='smajor'>"+e.c+" · "+e.m+" <span class='tag green'>"+tierName+"</span>"+(e.com==="弱"?" <span class='tag pink'>弱com·要套磁</span>":"")+"</div>"+
+  "<div class='srow'><span class='lbl'>为什么给你</span>"+why+"</div>"+
+  "<div class='srow'><span class='lbl'>差在哪</span>"+lack+"</div>"+
+  "<div class='srow'><span class='lbl'>今年怎么补</span>"+fix.replace("今年怎么补：","")+"</div>"+
+  (e.gate?"<div class='srow'><span class='lbl'>接收画像</span>"+e.gate+"；考核："+e.exam+"</div>":"<div class='srow'><span class='lbl'>接收画像</span>公开口径缺失，以当年招生简章为准；考核："+e.exam+"</div>")+
+  "<div class='dep'>依据："+dep1+"、"+dep2+(e.gate?"｜门槛与考核为公开通知口径":"｜门槛留空自查")+"</div></div>";
+}
+function suggestList(c,M){
+  const out=[];const v14=eff(14);
+  if(["none","sent"].includes(v14))out.push("动手前先套磁：弱com院校导师点头才能进面，每周两位、邮件里带项目链接。<span class='cite'>依据〔第14题・"+optLabel(14,v14)+"〕</span>");
+  if(eff(5)==="unk")out.push("去找教务开一份注明「专业人数＋名次」的排名证明，别用估算值填系统。<span class='cite'>依据〔第5题・不清楚〕</span>");
+  if(c.lowGrade)out.push("核心课低分会在初筛被看到：重修刷分，或用竞赛/项目对冲，二选一开始。<span class='cite'>依据〔第6题・"+optLabel(6,eff(6))+"〕</span>");
+  if(c.crossOK)out.push("投递顺序建议：先交叉院系、后本方向学院——交叉线的竞争结构常常更松。<span class='cite'>依据〔第3题・接受〕〔第9题・"+optLabel(9,eff(9)||"__unsure")+"〕</span>");
+  if(["none","unk"].includes(eff(11))||["none","sch"].includes(eff(12)))out.push("按你的阶段报一个算法类赛事（蓝桥杯/CCPC/校赛都行），出一个能写进简历的奖。<span class='cite'>依据〔第11题・"+optLabel(11,eff(11)||"__unsure")+"〕〔第12题・"+optLabel(12,eff(12)||"__unsure")+"〕</span>");
+  const a13=ans(13);
+  if(!Array.isArray(a13)||!a13.some(k=>["intern","oss","demo"].includes(k)))out.push("把手上的项目部署上线＋写清 README，工程筹码比空谈「熟悉」值钱。<span class='cite'>依据〔第13题・"+(a13&&a13.includes("none")?"都没有":"未填有效筹码")+"〕</span>");
+  const regs=Array.isArray(ans(15))?ans(15).filter(k=>!k.startsWith("__")):[];
+  if(regs.length&&!regs.includes("any"))out.push("你勾了"+regs.map(k=>optLabel(15,k)).join("、")+"：先查这些院校的报名数量限制（有的学校全校只能报 1 个），再排投递顺序。<span class='cite'>依据〔第15题・"+regs.map(k=>optLabel(15,k)).join("/")+"〕</span>");
+  if(["zhibo","any"].includes(eff(16)))out.push("直博往往单独通道、要提前联系导师＋2 封推荐信：和硕士志愿分开排。<span class='cite'>依据〔第16题・"+optLabel(16,eff(16)||"__unsure")+"〕</span>");
+  if(["y2","y3a"].includes(eff(18)))out.push("你还有整段准备期：优先把科研位次做实（进组＋跟紧课题），比多投营更值。<span class='cite'>依据〔第18题・"+optLabel(18,eff(18))+"〕</span>");
+  return out.slice(0,5).length?out.slice(0,5):["把第 14 题的导师联系从「没联系」改成「有正面回复」，是全表性价比最高的一步。<span class='cite'>依据〔第14题・"+optLabel(14,eff(14)||"__unsure")+"〕</span>"];
+}
+function watchList(c){
+  const out=[];
+  out.push("排名是校内百分位，跨校不可直接换算，投递以成绩单和排名证明为准。<span class='cite'>〔第5题〕</span>");
+  out.push("各校报名截止时间差异很大且逐年变动，本页不展示具体日期：投递前逐一核对目标院校当年简章。<span class='cite'>〔第18题・"+(eff(18)?optLabel(18,eff(18)):"阶段")+"〕</span>");
+  if(eff(8)&&eff(8)!=="none"&&!skipped(8))out.push("论文在投/在审不算已出成果，简历写清状态，别写「已发表」。<span class='cite'>〔第8题・"+optLabel(8,eff(8))+"〕</span>");
+  if(["none","sent"].includes(eff(14)))out.push("邮件两周没回就换下一位，别在一棵树上等。<span class='cite'>〔第14题・"+optLabel(14,eff(14))+"〕</span>");
+  out.push("英语硬线各校不同（常见 425/450/460/480 分层），且不设题采集——投递前对照目标简章自查。<span class='cite'>〔第18题・"+(eff(18)?optLabel(18,eff(18)):"阶段")+"〕</span>");
+  if(S.a.cas==="yes")out.push("中科院各所单独招生，时间线与高校不同，需要单独盯通知。<span class='cite'>〔第15题・小问①接受〕</span>");
+  if(["zhibo"].includes(eff(16)))out.push("直博要提前联系导师＋2 封教授推荐信，材料准备周期比硕士长。<span class='cite'>〔第16题・直博〕</span>");
+  if(eff(17)==="gw")out.push("考公岗位表对专业名称和代码有要求，报名时注意专业口径。<span class='cite'>〔第17题・考公〕</span>");
+  if(eff(18)==="y4")out.push("夏令营批次已过的话，主战场是 9 月预推免与候补转正，保持电话畅通。<span class='cite'>〔第18题・大四上〕</span>");
+  return out.slice(0,5);
+}
+function unlockHTML(M,c){
+  let h="<div class='tier-h'><span class='tt'>🔓 解锁扩展名单</span><span class='line'></span></div>";
+  h+="<div class='scard unlock'><div class='sname'>解锁后每档再加 3 所，共新增 9 所（冲/稳/保平分）</div>"+
+  "<div class='srow'>免费版给你的：冲 "+M.chong.length+" 所（最多 5）、稳 "+M.wen.length+" 所、保 "+M.bao.length+" 所，每所带三句话。</div>"+
+  "<div class='srow'>解锁后：冲稳保各扩到 6 所以上（冲含高契合追加位），共 18 所＋，全部带学校＋学院＋专业；另附<b>分方向院校细表</b>（排名线/英语线/考核方式，公开口径）与<b>关键时间线清单</b>。</div>"+
+  "<div class='price'><b>方案 A · 9.9 元</b><br><span class='small'>扩列名单（每档＋3）＋分方向细表＋时间线。一次买断，不是订阅；未点开解锁内容前可全额退，点开后不支持退。</span></div>"+
+  "<div class='price'><b>方案 B · 19.9 元</b><br><span class='small'>方案 A 全部 ＋ 每所解锁院校的「考核画像卡」（机试/笔试/面试构成、强弱com、是否要先联系导师——公开口径）＋ 12 个月关键节点日历。一次买断；未点开前可全额退。</span></div>"+
+  "<p class='small' style='margin-top:8px'>当前为第一版演示：支付未接入，下方以占位卡片示意解锁区结构。</p></div>";
+  [["冲",M.chong.length],["稳",M.wen.length],["保",M.bao.length]].forEach(t=>{
+    for(let i=1;i<=3;i++){
+      h+="<div class='scard locked'><div class='sname'>🔒 "+t[0]+"档 · 解锁可见 第 "+(t[1]+i)+" 所</div>"+
+      "<div class='smajor blur'>某院校 · 某学院 · 某专业</div>"+
+      "<div class='srow blur'>为什么给你／差在哪／今年怎么补——解锁后逐所展开。</div></div>";
+    }
+  });
+  return h;
+}
+function noQualHTML(){
+  const c=compute();const st=eff(18)?eff(18):"y3b";
+  const next={y2:"接下来半年盯两件事：把排名拉进资格线，同时用四六级和一门竞赛把简历垫厚；资格重新核定后回来重测。",
+    y3a:"接下来半年盯两件事：把排名拉进资格线，同时用四六级和一门竞赛把简历垫厚；资格重新核定后回来重测。",
+    y3b:"资格还没定的话，期末这一仗就是资格战；同时把考研目标院校的专业课真题盘出来，两条腿走路。",y4:"主战场换成考研：先定 3 所目标院校，专业课书目＋真题各过一遍；10 月正式报名前再评估一次。"}[st]||"把排名拉进资格线，资格重新核定后回来重测。";
+  let h="<div class='banner pinkb'><b>这份测试先到你这里暂停。</b><br>推免名单的前提，是校内推免资格。你选了〔第4题・明确没有资格〕，所以冲稳保名单先不出——不是给你下结论，是不让你拿着错地图走路。</div>";
+  h+="<div class='card'><h3>🛤 考研对照提示</h3><p style='margin-top:6px'>"+next+"</p><p class='small' style='margin-top:6px'>准备头绪依据：〔第4题・明确没有资格〕〔第18题・"+optLabel(18,eff(18)||"y3b")+"〕</p></div>";
+  h+="<div class='card'><h3 style='text-align:center;margin-bottom:6px'>六维 bg 雷达（自我观察仍可用）</h3><div class='radar-wrap'>"+radarSVG(c.D)+"<div class='radar-tip' id='radarTip'>点维度名看来源</div></div></div>";
+  h+="<div class='king'>「改得动的，都来得及。」</div>";
+  h+="<div class='foot'><button class='btn ghost' id='redoBtn'>🔄 重新测试</button>"+
+  "<p class='small' style='margin-top:10px'>原创趣味设定，仅供娱乐与自我观察</p></div>";
+  return h;
+}
+function bindResult(){
+  const rt=$("radarTip");
+  document.querySelectorAll(".axis").forEach(a=>a.addEventListener("click",()=>{if(rt)rt.textContent=AXIS_INFO[a.dataset.axis];}));
+  const rb=$("redoBtn");if(rb)rb.onclick=redo;
+}
+function redo(){
+  S={a:{},idx:0};show(0);
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
+  $("quiz").classList.add("on");window.scrollTo(0,0);
+}
+$("startBtn").onclick=()=>{S={a:{},idx:0};
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
+  $("quiz").classList.add("on");show(0);window.scrollTo(0,0);};
+buildQuiz();
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
+initGate();
+</script>
+</body>
+</html>
