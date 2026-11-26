@@ -198,13 +198,13 @@ const QUESTIONS=[
  ["none","无低分",0],["one","1 门在 60–70 分",-4],["two","2 门以上在 60–70 分",-10],["fail","有挂科且已补考通过",-12]],neu:0},
 {id:7,g:1,t:"7. 科研经历形式",n:"",type:"s",o:[
  ["none","无",15],["dc","大创项目",45],["zh","组会打杂",30],["kt","参与导师课题",58],["dl","独立小课题",70]],neu:30},
-{id:8,g:1,t:"8. 论文与成果的层次",n:"CCF 指中国计算机学会推荐国际会议与期刊目录；选项按含金量从高到低排列",type:"s",o:[
+{id:8,g:1,t:"8. 论文与成果的层次（可多选）",n:"CCF 指中国计算机学会推荐国际会议与期刊目录；选项按含金量从高到低排列；可多选，计分取最高一项",type:"m",o:[
  ["none","无",0],["ccfa","CCF-A 会议或期刊",46],["sci1","SCI 一区",44],["ccfb","CCF-B",36],["sci2","SCI 二区",34],["ccfc","CCF-C",27],["sci3","SCI 三区",24],["core","中文核心",19],["ei","EI 会议",16],["sci4","SCI 四区",13],["jr","普通期刊",9],["ip","发明专利",8],["um","实用新型或软著",4]],neu:0},
 {id:9,g:1,t:"9. 该论文是否与本专业方向相关",n:"",type:"s",o:[
  ["hi","强相关",1.3],["mid","沾边",1.0],["low","不相关",0.7],["none","无成果",1.0]],neu:1.0},
 {id:10,g:1,t:"10. 作者位次与数量",n:"",type:"s",o:[
  ["f1","一作 1 篇",1.0],["f2","一作 2 篇及以上",1.15],["cf","共同一作",0.85],["s2","二作",0.6],["ot","其他位次",0.4],["none","无成果",0]],neu:0.6},
-{id:11,g:2,t:"11. 竞赛类型（按中国高等教育学会高校竞赛榜单口径）",n:"算法类指 ACM-ICPC、CCPC、蓝桥杯、天梯赛、Codeforces 等；一类竞赛指榜单内顶级赛事。算法类与一类竞赛评级更高，两个条件同时满足时权重最高。",type:"s",o:[
+{id:11,g:2,t:"11. 竞赛类型（可多选，按中国高等教育学会高校竞赛榜单口径）",n:"算法类指 ACM-ICPC、CCPC、蓝桥杯、天梯赛、Codeforces 等；一类竞赛指榜单内顶级赛事。可多选，计分取最高一项；算法类与一类竞赛评级更高，同时满足权重最高。",type:"m",o:[
  ["c1a","一类竞赛 · 算法类",1.5],["c1n","一类竞赛 · 非算法类",1.15],["c2a","二类竞赛 · 算法类",1.2],["c2n","二类竞赛 · 非算法类",0.7],["unk","不清楚属于哪类",0.6],["none","没参加过",0]],neu:0.6},
 {id:12,g:2,t:"12. 竞赛最高奖项层级",n:"",type:"s",o:[
  ["g1","国家级一等",55],["g23","国家级二三等奖",42],["p1","省部级一等",32],["p23","省部级二三等奖",24],["sch","校级",0],["none","无奖项",0]],neu:0},
@@ -428,6 +428,8 @@ function ans(qid){return S.a[qid];}
 function skipped(qid){return S.a[qid]==="__skip";}
 function unsure(qid){return S.a[qid]==="__unsure";}
 function eff(qid){const v=S.a[qid];return (v===undefined||v==="__skip")?null:v;}
+function bestOpt(qid){const v=eff(qid);if(v===null)return null;if(v==="__unsure"||v==="__skip")return v;const Q=QUESTIONS.find(q=>q.id===qid);if(Q.type!=="m"||!Array.isArray(v))return v;let best=null,bs=-1;v.forEach(k=>{if(k==="none")return;const o=Q.o.find(o=>o[0]===k);if(o&&o[2]>bs){bs=o[2];best=k;}});return best||v[0];}
+function citeLabel(qid){const v=eff(qid);if(v==="__unsure")return "不确定";if(v===null||v==="__skip")return null;const b=bestOpt(qid);if(b==="__unsure")return "不确定";const Q=QUESTIONS.find(q=>q.id===qid);if(Q.type==="m"&&Array.isArray(v)&&v.length>1){const o=Q.o.find(o=>o[0]===b);return (o?o[1]:String(v[0]))+"等"+v.length+"项";}return optLabel(qid,v);}
 
 /* —— 计分（每次结果页都从当前答案整体重算，不累加）—— */
 function compute(){
@@ -439,11 +441,11 @@ function compute(){
   const q6=g(6);if(q6!==null)D2+=q6;
   D2=Math.max(0,Math.min(100,D2));
   const q7=(g(7)===null)?30:g(7);
-  const ps=(g(8)===null)?0:g(8);
+  const b8=bestOpt(8);const ps=(b8&&!["__unsure","__skip"].includes(b8))?(QUESTIONS.find(x=>x.id===8).o.find(o=>o[0]===b8)[2]):0;
   const rel=(g(9)===null)?1:g(9);
   const auth=(g(10)===null)?0.6:g(10);
   const D3=Math.max(0,Math.min(100,q7+ps*rel*auth));
-  const coeff=(g(11)===null)?0.6:g(11);
+  const b11=bestOpt(11);const coeff=(b11===null||b11==="__unsure"||b11==="__skip")?0.6:(b11==="none"?0:(QUESTIONS.find(x=>x.id===11).o.find(o=>o[0]===b11)[2]));
   const award=(g(12)===null)?0:g(12);
   const D4=Math.max(0,Math.min(100,award*coeff));
   const D5=60;
@@ -467,7 +469,7 @@ function chips(){
   ch.rank=(!skipped(5))&&(c.D.a2>=72);
   ch.paper=c.ps>=19&&!skipped(8)&&eff(8)!=="__unsure";
   ch.lab=[45,58,70].includes(c.q7v)&&!skipped(7);
-  ch.algo=["c1a","c2a"].includes(eff(11))&&["g1","g23","p1"].includes(eff(12));
+  ch.algo=["c1a","c2a"].includes(bestOpt(11))&&["g1","g23","p1"].includes(eff(12));
   const a13=ans(13);ch.eng=Array.isArray(a13)&&a13.some(k=>["intern","oss","demo","lead"].includes(k));
   ch.cross=c.crossOK;
   return ch;
@@ -483,12 +485,12 @@ function fit(e,ch,c){
 function citeFor(key){
   switch(key){
     case "rank":return skipped(5)?null:"〔第5题・"+optLabel(5,eff(5)||"__unsure")+"〕";
-    case "paper":return (eff(8)&&eff(8)!=="none"&&!skipped(8))?"〔第8题・"+optLabel(8,eff(8))+"〕":null;
+    case "paper":{const l=citeLabel(8);return l?"〔第8题・"+l+"〕":null;}
     case "lab":return (eff(7)&&!["none"].includes(eff(7))&&!skipped(7))?"〔第7题・"+optLabel(7,eff(7))+"〕":null;
-    case "algo":return (eff(12)&&!["none","sch"].includes(eff(12))&&!skipped(12))?"〔第12题・"+optLabel(12,eff(12))+"〕":((eff(11)&&!["none"].includes(eff(11))&&!skipped(11))?"〔第11题・"+optLabel(11,eff(11))+"〕":null);
+    case "algo":{if(eff(12)&&!["none","sch"].includes(eff(12))&&!skipped(12))return "〔第12题・"+optLabel(12,eff(12))+"〕";const b=bestOpt(11);if(b&&b!=="none"&&!skipped(11)){const l=citeLabel(11);if(l)return "〔第11题・"+l+"〕";}return null;}
     case "eng":{const a13=ans(13);if(!Array.isArray(a13))return null;const k=a13.find(x=>["intern","oss","demo","lead"].includes(x));return k?"〔第13题・"+optLabel(13,k)+"〕":null;}
     case "cross":return eff(3)==="acc"?"〔第3题・接受〕":null;
-    case "dir":return (eff(2)&&!skipped(2))?"〔第2题・"+optLabel(2,eff(2))+"〕":null;
+    case "dir":{if(!eff(2)||skipped(2))return null;let lb=optLabel(2,eff(2));if(eff(2)==="ot"&&S.a.majortext)lb+="（"+S.a.majortext.trim()+"）";return "〔第2题・"+lb+"〕";}
   }
   return null;
 }
@@ -504,28 +506,46 @@ function match(){
     if(e.rk&&pct!==null){const miss=pct-e.rk;if(miss>10)return false;}
     return true;
   });
-  const band=(lo,hi)=>pool.filter(e=>e.d>=lo&&e.d<=hi);
-  function pick(tgt,n,mode){
-    let out=[];
-    for(const pad of [0,4,8]){
-      const arr=pool.filter(e=>Math.abs(e.d-tgt)<=8+pad)
-        .map(e=>({e,f:fit(e,ch,c)}))
-        .filter(x=>{const miss=pct!==null&&x.e.rk?pct-x.e.rk:0;return mode==="chong"?miss<=0:miss<=10;});
-      arr.sort((a,b)=>(b.f-a.f)||(Math.abs(a.e.d-tgt)-Math.abs(b.e.d-tgt)));
-      out=arr.slice(0,n).map(x=>x.e);
-      if(out.length>=n)break;
-    }
-    if(out.length<n){const rest=pool.filter(e=>!out.includes(e)).map(e=>({e,f:fit(e,ch,c)})).sort((a,b)=>(b.f-a.f)||(Math.abs(a.e.d-tgt)-Math.abs(b.e.d-tgt)));
-      out=out.concat(rest.slice(0,n-out.length).map(x=>x.e));}
-    return out;
-  }
   const unlocked=(function(){try{return localStorage.getItem("byby_unlock")==="1";}catch(e){return false;}})();
+  const usedE=new Set(),usedCnt={};
+  function missOK(e,mode){if(pct===null||!e.rk)return true;const miss=pct-e.rk;return mode==="chong"?miss<=0:miss<=10;}
+  function pickTier(tgt,n,mode){
+    const taken=[];
+    function fill(cands,dedupeSchool){
+      for(const x of cands){
+        if(taken.length>=n)break;
+        const e=x.e;
+        if(usedE.has(e))continue;
+        if(taken.some(t=>t.e===e))continue;
+        if(!missOK(e,mode))continue;
+        if(dedupeSchool&&taken.some(t=>t.e.s===e.s))continue;
+        if((usedCnt[e.s]||0)>=2)continue;
+        taken.push(x);
+        usedE.add(e);
+        usedCnt[e.s]=(usedCnt[e.s]||0)+1;
+      }
+    }
+    for(const pad of [0,4,8,14]){
+      const cands=pool.filter(e=>Math.abs(e.d-tgt)<=8+pad&&!(usedCnt[e.s]>=2))
+        .map(e=>({e,f:fit(e,ch,c)}))
+        .sort((a,b)=>(b.f-a.f)||(Math.abs(a.e.d-tgt)-Math.abs(b.e.d-tgt)));
+      fill(cands,true);
+      if(taken.length>=n)break;
+    }
+    if(taken.length<n){
+      const cands=pool.filter(e=>!usedE.has(e)&&(usedCnt[e.s]||0)<2)
+        .map(e=>({e,f:fit(e,ch,c)+(usedCnt[e.s]?-3:0)}))
+        .sort((a,b)=>(b.f-a.f)||(Math.abs(a.e.d-tgt)-Math.abs(b.e.d-tgt)));
+      fill(cands,false);
+    }
+    return taken.map(x=>x.e);
+  }
   const chongN=c.lowGrade?2:(3+(c.crossOK?1:0)+(pool.filter(e=>Math.abs(e.d-(c.T+13))<=10&&fit(e,ch,c)>=2).length>=3?1:0));
   const cap=n=>Math.min(n,5);
   const more=unlocked?3:0;
-  const chong=pick(c.T+13,Math.min(cap(chongN)+more,8),"chong");
-  const wen=pick(c.T-0.5,(c.lowGrade?4:3)+more,"wen");
-  const bao=pick(c.T-13,3+more,"bao");
+  const chong=pickTier(c.T+13,Math.min(cap(chongN)+more,8),"chong");
+  const wen=pickTier(c.T-0.5,(c.lowGrade?4:3)+more,"wen");
+  const bao=pickTier(c.T-13,3+more,"bao");
   return {pool,chong,wen,bao,c,chongN:cap(chongN),unlocked};
 }
 function crossList(){
@@ -549,9 +569,9 @@ function crossList(){
 function gapOf(e){
   const v14=eff(14);
   if(["none","sent"].includes(v14)&&(e.com==="弱"||e.com==="中"))return {k:"taoci",cite:"〔第14题・"+optLabel(14,v14)+"〕"};
-  const v12=eff(12),v11=eff(11);
+  const v12=eff(12),v11=bestOpt(11);
   if(["none","sch"].includes(v12)&&!skipped(12))return {k:"award",cite:"〔第12题・"+optLabel(12,v12)+"〕"};
-  if(["none","unk"].includes(v11)&&!skipped(11))return {k:"algo",cite:"〔第11题・"+optLabel(11,v11)+"〕"};
+  if(["none","unk"].includes(v11)&&!skipped(11))return {k:"algo",cite:"〔第11题・"+citeLabel(11)+"〕"};
   const a13=ans(13);const hasEng=Array.isArray(a13)&&a13.some(k=>["intern","oss","demo","lead"].includes(k));
   if(!hasEng&&(a13===undefined||a13.includes("none")||a13==="__skip"||a13==="__unsure"))return {k:"eng",cite:"〔第13题・"+(a13&&a13.includes("none")?"都没有":"未填有效筹码")+"〕"};
   const c=compute();
@@ -588,6 +608,8 @@ function buildQuiz(){
     html+="<div class='opts'>";
     q.o.forEach(o=>{html+="<button class='opt' data-q='"+q.id+"' data-k='"+o[0]+"'>"+o[1]+"</button>";});
     html+="</div>";
+    if(q.id===2){html+="<div id='majorInputWrap' style='display:none;margin-top:4px'><div class='st' style='font-size:12.5px;color:var(--ink2)'>你的专业名称（选填，写了推荐更准）</div><input id='majorInput' class='code-input' style='letter-spacing:0;text-transform:none;font-size:14px;padding:10px 12px' placeholder='如：机器人工程'></div>";}
+    if(q.id===11){html+="<div id='compInputWrap' style='display:none;margin-top:4px'><div class='st' style='font-size:12.5px;color:var(--ink2)'>具体赛事名称（选填，多个用、分隔）</div><input id='compInput' class='code-input' style='letter-spacing:0;text-transform:none;font-size:14px;padding:10px 12px' placeholder='如：蓝桥杯、ICPC 区域赛'></div>";}
     if(q.id===15){
       html+="<div class='subq'><div class='st'>小问① 是否接受中科院及各研究所？</div><div class='mini-row' data-sub='cas'>"+
         [["yes","接受"],["no","不考虑"],["nth","没想过"]].map(o=>"<button class='mini' data-k='"+o[0]+"'>"+o[1]+"</button>").join("")+"</div>";
@@ -599,6 +621,8 @@ function buildQuiz(){
       "<button class='btn main' data-nav='next'>"+(qi===QUESTIONS.length-1?"生成定位 →":"下一题 →")+"</button></div>";
     d.innerHTML=html;st.appendChild(d);
   });
+  const mi=st.querySelector("#majorInput");if(mi)mi.addEventListener("input",e=>{S.a.majortext=e.target.value;});
+  const ci=st.querySelector("#compInput");if(ci)ci.addEventListener("input",e=>{S.a.competext=e.target.value;});
   st.addEventListener("click",onQuizClick);
 }
 function answered(q){
@@ -623,6 +647,8 @@ function paintSlide(qi){
     const aid=b.dataset.aid;
     b.classList.toggle("sel",S.a[q.id]===(aid==="unsure"?"__unsure":"__skip"));
   });
+  if(q.id===2){const w=d.querySelector("#majorInputWrap");if(w)w.style.display=(S.a[2]==="ot")?"block":"none";}
+  if(q.id===11){const w=d.querySelector("#compInputWrap");if(w){const a11=S.a[11];const show=Array.isArray(a11)?!a11.includes("none"):(a11&&a11!=="none"&&a11!=="__unsure"&&a11!=="__skip");w.style.display=show?"block":"none";}}
   const nb=d.querySelector("[data-nav='next']");
   nb.disabled=!answered(q);
   $("qNum").textContent="第 "+(qi+1)+" / 18 题";
@@ -749,13 +775,13 @@ function renderResult(){
 }
 function decodeText(c){
   const lv=eff(1)?optLabel(1,eff(1)):"（未填层次）";
-  const dn=optLabel(2,c.dir);
+  const dn=optLabel(2,c.dir)+(c.dir==="other"&&S.a.majortext?"（"+S.a.majortext.trim()+"）":"");
   const rk=eff(5)?optLabel(5,eff(5)):"（未填排名）";
-  let p1="你现在的位置："+lv+"读"+dn+"，排名"+rk+"。";
+  let p1="你现在的位置："+lv+"读"+dn+"，排名"+rk+"。"+(S.a.competext?"（赛事："+S.a.competext.trim()+"）":"");
   if(c.edge)p1+="推免资格还在卡线。";
   const dims=[["a1",c.D.a1,eff(1)&&eff(1)!=="__unsure"?"〔第1题・"+optLabel(1,eff(1))+"〕":null],
     ["a2",c.D.a2,eff(5)&&eff(5)!=="__unsure"?"〔第5题・"+optLabel(5,eff(5))+"〕":null],
-    ["a3",c.D.a3,(eff(8)&&eff(8)!=="none"&&!skipped(8))?"〔第8题・"+optLabel(8,eff(8))+"〕":((eff(7)&&!skipped(7))?"〔第7题・"+optLabel(7,eff(7))+"〕":null)],
+    ["a3",c.D.a3,citeLabel(8)?("〔第8题・"+citeLabel(8)+"〕"):((eff(7)&&!skipped(7))?"〔第7题・"+optLabel(7,eff(7))+"〕":null)],
     ["a4",c.D.a4,(eff(12)&&!skipped(12))?"〔第12题・"+optLabel(12,eff(12))+"〕":null],
     ["a6",c.D.a6,(eff(13)&&Array.isArray(ans(13))&&ans(13).length&&!ans(13).includes("none"))?"〔第13题・"+optLabel(13,ans(13)[0])+"〕":null]];
   dims.sort((a,b)=>b[1]-a[1]);
@@ -801,7 +827,7 @@ function suggestList(c,M){
   if(eff(5)==="unk")out.push("去找教务开一份注明「专业人数＋名次」的排名证明，别用估算值填系统。<span class='cite'>依据〔第5题・不清楚〕</span>");
   if(c.lowGrade)out.push("核心课低分会在初筛被看到：重修刷分，或用竞赛/项目对冲，二选一开始。<span class='cite'>依据〔第6题・"+optLabel(6,eff(6))+"〕</span>");
   if(c.crossOK)out.push("投递顺序建议：先交叉院系、后本方向学院——交叉线的竞争结构常常更松。<span class='cite'>依据〔第3题・接受〕〔第9题・"+optLabel(9,eff(9)||"__unsure")+"〕</span>");
-  if(["none","unk"].includes(eff(11))||["none","sch"].includes(eff(12)))out.push("按你的阶段报一个算法类赛事（蓝桥杯/CCPC/校赛都行），出一个能写进简历的奖。<span class='cite'>依据〔第11题・"+optLabel(11,eff(11)||"__unsure")+"〕〔第12题・"+optLabel(12,eff(12)||"__unsure")+"〕</span>");
+  {const b11s=bestOpt(11);if((b11s===null||["none","unk"].includes(b11s))||["none","sch"].includes(eff(12)))out.push("按你的阶段报一个算法类赛事（蓝桥杯/CCPC/校赛都行），出一个能写进简历的奖。<span class='cite'>依据〔第11题・"+(citeLabel(11)||"不确定")+"〕〔第12题・"+optLabel(12,eff(12)||"__unsure")+"〕</span>");}
   const a13=ans(13);
   if(!Array.isArray(a13)||!a13.some(k=>["intern","oss","demo"].includes(k)))out.push("把手上的项目部署上线＋写清 README，工程筹码比空谈「熟悉」值钱。<span class='cite'>依据〔第13题・"+(a13&&a13.includes("none")?"都没有":"未填有效筹码")+"〕</span>");
   const regs=Array.isArray(ans(15))?ans(15).filter(k=>!k.startsWith("__")):[];
@@ -814,7 +840,7 @@ function watchList(c){
   const out=[];
   out.push("排名是校内百分位，跨校不可直接换算，投递以成绩单和排名证明为准。<span class='cite'>〔第5题〕</span>");
   out.push("各校报名截止时间差异很大且逐年变动，本页不展示具体日期：投递前逐一核对目标院校当年简章。<span class='cite'>〔第18题・"+(eff(18)?optLabel(18,eff(18)):"阶段")+"〕</span>");
-  if(eff(8)&&eff(8)!=="none"&&!skipped(8))out.push("论文在投/在审不算已出成果，简历写清状态，别写「已发表」。<span class='cite'>〔第8题・"+optLabel(8,eff(8))+"〕</span>");
+  if(eff(8)&&eff(8)!=="none"&&!skipped(8)){const l=citeLabel(8);if(l)out.push("论文在投/在审不算已出成果，简历写清状态，别写「已发表」。<span class='cite'>〔第8题・"+l+"〕</span>");}
   if(["none","sent"].includes(eff(14)))out.push("邮件两周没回就换下一位，别在一棵树上等。<span class='cite'>〔第14题・"+optLabel(14,eff(14))+"〕</span>");
   out.push("英语硬线各校不同（常见 425/450/460/480 分层），且不设题采集——投递前对照目标简章自查。<span class='cite'>〔第18题・"+(eff(18)?optLabel(18,eff(18)):"阶段")+"〕</span>");
   if(S.a.cas==="yes")out.push("中科院各所单独招生，时间线与高校不同，需要单独盯通知。<span class='cite'>〔第15题・小问①接受〕</span>");
@@ -873,7 +899,9 @@ function bindResult(){
   };
 }
 function redo(){
-  S={a:{},idx:0};show(0);
+  S={a:{},idx:0};
+  const mi=$("majorInput"),ci=$("compInput");if(mi)mi.value="";if(ci)ci.value="";
+  show(0);
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
   $("quiz").classList.add("on");window.scrollTo(0,0);
 }
@@ -889,6 +917,7 @@ $("codeBtn").onclick=()=>{
   }
 };
 $("startBtn").onclick=()=>{S={a:{},idx:0};
+  const mi=$("majorInput"),ci=$("compInput");if(mi)mi.value="";if(ci)ci.value="";
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
   $("quiz").classList.add("on");show(0);window.scrollTo(0,0);};
 buildQuiz();
