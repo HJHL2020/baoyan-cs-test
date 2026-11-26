@@ -113,20 +113,6 @@ ul.tips{margin:6px 0 2px 1.1em}
 <body>
 <div id="app">
 
-<!-- 激活门禁 -->
-<section id="gate" class="screen">
-  <div class="logo">🔐</div>
-  <h1 style="text-align:center">激活测试</h1>
-  <div class="card" style="margin-top:16px">
-    <p style="font-weight:700">本测试为付费内容，凭激活码进入。</p>
-    <p class="small" style="margin-top:6px">激活码在你购买后提供（格式形如 <b>BY-XXXX-XXXX</b>）。一次激活、本机长期有效；换手机或电脑需要重新输入。激活码每台设备用一次即可，链接本身可以随便点，没有码只能看到这一页。</p>
-    <input id="codeInput" class="code-input" placeholder="BY-AB2K-9XQW" autocomplete="off" style="margin-top:12px">
-    <button class="btn main" id="codeBtn" style="margin-top:12px">激活并进入 →</button>
-    <p class="small" id="codeMsg" style="color:var(--pink-dk);margin-top:10px;min-height:18px"></p>
-  </div>
-  <p class="small" style="text-align:center;margin-top:16px">原创设定，仅供自我评估参考</p>
-</section>
-
 <!-- 首页 -->
 <section id="home" class="screen on">
   <div class="logo">🎯</div>
@@ -488,14 +474,11 @@ const CROSS_ADV={"人工智能":"跨背景被鼓励","数据科学":"跨背景�
 const STAGE_NODE={y2:"大三上开学前",y3a:"本学期内（明年5月夏令营报名前）",y3b:"4月底（夏令营报名开放前）",y4:"9月预推免系统开放前"};
 const DIM_NAME={a1:"院校层次",a2:"专业排名",a3:"科研产出",a4:"竞赛含金量",a5:"英语",a6:"交叉与工程经历"};
 
-/* ═══════════════ 数据区四 · 激活码（新增激活码：把新 hash 加进数组即可，明码清单在卖家手里） ═══════════════ */
-const CODE_HASHES=[582675061,3247271511,110998084,3461933379,2849347618,3083182675,2900111976,4204549634,324320402,177766089,3524540865,3251435539,575750871,1483051265,1243188561,1779635815,4261126073,151985600,774349264,3904773548,2052614137,3581632153,3110816566,4231010799,3889290788,2533841053,886578081,1380340565,1057751232,2750894715,731043934,1506454503,1000760957,1922919035,194628318,3276323898,3101828512,398185286,1330171049,2875057381,1762773235,1391099259,1657171454,3764959340,2559955795,2523893729,2309276830,3290131383,3874426950,2445653189,3888131256,3882009664,451420288,4286368921,3008597775,921564298,3953151014,3966798129,2552671684,2422546617];
+/* ═══════════════ 数据区四 · 解锁码（新增解锁码：把新 hash 加进 UNLOCK_HASHES；明码清单在卖家手里） ═══════════════ */
 const UNLOCK_HASHES=[386793747,3159407775,981691722,3699780021,411964363,1208484787,3343320726,2003963647,757507010,2904010737,2569142125,3381184450,2055532573,2633042548,2768944348,549198180,3913928061,1755144348,1990835995,2366845663,3027152552,2369789752,1807814442,1011361082,900866310,3238231901,1854994358,1831534146,2177440832,1181837596,3608277160,1185055346,1651673723,701392555,1461057018,2219844498,3650380117,127996846,80974962,4286893169,2570751025,2040909769,2861715629,2221865284,915973402,422695232,236667044,3593242861,2350721179,2996310438,4173002887,2137178573,2977309545,1219793344,4247527540,3137293682,2170146097,2607839663,1969912981,254158384];
 function codeHash(s){let h=5381;s=(s||"").trim().toUpperCase();for(let i=0;i<s.length;i++){h=(((h<<5)+h)+s.charCodeAt(i))>>>0;}return h;}
 function initGate(){
-  let ok=false;try{ok=localStorage.getItem("byby_ok")==="1";}catch(e){}
-  if(ok){$("home").classList.add("on");return;}
-  $("gate").classList.add("on");
+  $("home").classList.add("on");
 }
 
 /* ═══════════════ 运行区 ═══════════════ */
@@ -981,17 +964,6 @@ function redo(){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
   $("quiz").classList.add("on");window.scrollTo(0,0);
 }
-$("codeBtn").onclick=()=>{
-  const v=$("codeInput").value.trim();
-  if(!v){$("codeMsg").textContent="先输入激活码。";return;}
-  if(CODE_HASHES.includes(codeHash(v))){
-    try{localStorage.setItem("byby_ok","1");}catch(e){}
-    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
-    $("home").classList.add("on");window.scrollTo(0,0);
-  }else{
-    $("codeMsg").textContent="激活码不对：核对格式 BY-XXXX-XXXX（区分大小写会自动转大写），或联系卖家。";
-  }
-};
 $("startBtn").onclick=()=>{S={a:{},idx:0};
   const mi=$("majorInput"),ci=$("compInput");if(mi)mi.value="";if(ci)ci.value="";
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
