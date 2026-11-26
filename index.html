@@ -124,7 +124,7 @@ ul.tips{margin:6px 0 2px 1.1em}
     <button class="btn main" id="codeBtn" style="margin-top:12px">激活并进入 →</button>
     <p class="small" id="codeMsg" style="color:var(--pink-dk);margin-top:10px;min-height:18px"></p>
   </div>
-  <p class="small" style="text-align:center;margin-top:16px">原创趣味设定，仅供娱乐与自我观察</p>
+  <p class="small" style="text-align:center;margin-top:16px">原创设定，仅供自我评估参考</p>
 </section>
 
 <!-- 首页 -->
@@ -144,11 +144,11 @@ ul.tips{margin:6px 0 2px 1.1em}
   </div>
   <div class="meta-row">
     <span class="tag green">18 题 ≈ 5 分钟</span>
-    <span class="tag gold">结果页：冲 3–5 · 稳 3 · 保 3</span>
+    <span class="tag gold">结果页：冲 3–5 · 稳 3 · 保 3 · 可解锁 +9</span>
     <span class="tag green">不登录 · 不收集信息</span>
   </div>
   <button class="btn main" id="startBtn">开始测试 →</button>
-  <p class="small" style="text-align:center;margin-top:14px">原创趣味设定，仅供娱乐与自我观察<br>院校信息为公开口径整理，投递以当年招生简章为准</p>
+  <p class="small" style="text-align:center;margin-top:14px">原创设定，仅供自我评估参考<br>院校信息为公开口径整理，投递以当年招生简章为准</p>
 </section>
 
 <!-- 答题 -->
@@ -412,23 +412,13 @@ const DIM_NAME={a1:"院校层次",a2:"专业排名",a3:"科研产出",a4:"竞赛
 
 /* ═══════════════ 数据区四 · 激活码（新增激活码：把新 hash 加进数组即可，明码清单在卖家手里） ═══════════════ */
 const CODE_HASHES=[582675061,3247271511,110998084,3461933379,2849347618,3083182675,2900111976,4204549634,324320402,177766089,3524540865,3251435539,575750871,1483051265,1243188561,1779635815,4261126073,151985600,774349264,3904773548,2052614137,3581632153,3110816566,4231010799,3889290788,2533841053,886578081,1380340565,1057751232,2750894715,731043934,1506454503,1000760957,1922919035,194628318,3276323898,3101828512,398185286,1330171049,2875057381,1762773235,1391099259,1657171454,3764959340,2559955795,2523893729,2309276830,3290131383,3874426950,2445653189,3888131256,3882009664,451420288,4286368921,3008597775,921564298,3953151014,3966798129,2552671684,2422546617];
+const UNLOCK_HASHES=[386793747,3159407775,981691722,3699780021,411964363,1208484787,3343320726,2003963647,757507010,2904010737,2569142125,3381184450,2055532573,2633042548,2768944348,549198180,3913928061,1755144348,1990835995,2366845663,3027152552,2369789752,1807814442,1011361082,900866310,3238231901,1854994358,1831534146,2177440832,1181837596,3608277160,1185055346,1651673723,701392555,1461057018,2219844498,3650380117,127996846,80974962,4286893169,2570751025,2040909769,2861715629,2221865284,915973402,422695232,236667044,3593242861,2350721179,2996310438,4173002887,2137178573,2977309545,1219793344,4247527540,3137293682,2170146097,2607839663,1969912981,254158384];
 function codeHash(s){let h=5381;s=(s||"").trim().toUpperCase();for(let i=0;i<s.length;i++){h=(((h<<5)+h)+s.charCodeAt(i))>>>0;}return h;}
 function initGate(){
   let ok=false;try{ok=localStorage.getItem("byby_ok")==="1";}catch(e){}
   if(ok){$("home").classList.add("on");return;}
   $("gate").classList.add("on");
 }
-$("codeBtn").onclick=()=>{
-  const v=$("codeInput").value.trim();
-  if(!v){$("codeMsg").textContent="先输入激活码。";return;}
-  if(CODE_HASHES.includes(codeHash(v))){
-    try{localStorage.setItem("byby_ok","1");}catch(e){}
-    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
-    $("home").classList.add("on");window.scrollTo(0,0);
-  }else{
-    $("codeMsg").textContent="激活码不对：核对格式 BY-XXXX-XXXX（区分大小写会自动转大写），或联系卖家。";
-  }
-};
 
 /* ═══════════════ 运行区 ═══════════════ */
 let S={a:{},idx:0,calcDone:false};
@@ -529,12 +519,14 @@ function match(){
       out=out.concat(rest.slice(0,n-out.length).map(x=>x.e));}
     return out;
   }
+  const unlocked=(function(){try{return localStorage.getItem("byby_unlock")==="1";}catch(e){return false;}})();
   const chongN=c.lowGrade?2:(3+(c.crossOK?1:0)+(pool.filter(e=>Math.abs(e.d-(c.T+13))<=10&&fit(e,ch,c)>=2).length>=3?1:0));
   const cap=n=>Math.min(n,5);
-  const chong=pick(c.T+13,cap(chongN),"chong");
-  const wen=pick(c.T-0.5,c.lowGrade?4:3,"wen");
-  const bao=pick(c.T-13,3,"bao");
-  return {pool,chong,wen,bao,c,chongN:cap(chongN)};
+  const more=unlocked?3:0;
+  const chong=pick(c.T+13,Math.min(cap(chongN)+more,8),"chong");
+  const wen=pick(c.T-0.5,(c.lowGrade?4:3)+more,"wen");
+  const bao=pick(c.T-13,3+more,"bao");
+  return {pool,chong,wen,bao,c,chongN:cap(chongN),unlocked};
 }
 function crossList(){
   const c=compute();const names=CROSS_MAP[c.dir]||[];
@@ -751,7 +743,7 @@ function renderResult(){
   /* 解锁区 */
   html+=unlockHTML(M,c);
   html+="<div class='foot'><button class='btn ghost' id='redoBtn'>🔄 重新测试</button>"+
-    "<p class='small' style='margin-top:10px'>原创趣味设定，仅供娱乐与自我观察<br>院校信息为公开口径整理（第四轮学科评估/官方通知/2024实战记录），投递以当年招生简章为准</p></div>";
+    "<p class='small' style='margin-top:10px'>原创设定，仅供自我评估参考<br>院校信息为公开口径整理（第四轮学科评估/官方通知/2024实战记录），投递以当年招生简章为准</p></div>";
   wrap.innerHTML=html;R.appendChild(wrap);
   bindResult();
 }
@@ -832,13 +824,16 @@ function watchList(c){
   return out.slice(0,5);
 }
 function unlockHTML(M,c){
-  let h="<div class='tier-h'><span class='tt'>🔓 解锁扩展名单</span><span class='line'></span></div>";
-  h+="<div class='scard unlock'><div class='sname'>解锁后每档再加 3 所，共新增 9 所（冲/稳/保平分）</div>"+
-  "<div class='srow'>免费版给你的：冲 "+M.chong.length+" 所（最多 5）、稳 "+M.wen.length+" 所、保 "+M.bao.length+" 所，每所带三句话。</div>"+
-  "<div class='srow'>解锁后：冲稳保各扩到 6 所以上（冲含高契合追加位），共 18 所＋，全部带学校＋学院＋专业；另附<b>分方向院校细表</b>（排名线/英语线/考核方式，公开口径）与<b>关键时间线清单</b>。</div>"+
-  "<div class='price'><b>方案 A · 9.9 元</b><br><span class='small'>扩列名单（每档＋3）＋分方向细表＋时间线。一次买断，不是订阅；未点开解锁内容前可全额退，点开后不支持退。</span></div>"+
-  "<div class='price'><b>方案 B · 19.9 元</b><br><span class='small'>方案 A 全部 ＋ 每所解锁院校的「考核画像卡」（机试/笔试/面试构成、强弱com、是否要先联系导师——公开口径）＋ 12 个月关键节点日历。一次买断；未点开前可全额退。</span></div>"+
-  "<p class='small' style='margin-top:8px'>当前为第一版演示：支付未接入，下方以占位卡片示意解锁区结构。</p></div>";
+  if(M.unlocked){
+    return "<div class='scard unlock'><div class='sname'>✅ 完整版已解锁</div><div class='srow'>当前名单：冲 "+M.chong.length+" 所 · 稳 "+M.wen.length+" 所 · 保 "+M.bao.length+" 所（已含解锁扩展，全部带学校＋学院＋专业＋三句话）。</div><div class='srow small'>解锁码可在本机反复使用；换设备需重新输入。按你的方向与条件，库内能给的都给了——宁缺毋滥。</div></div>";
+  }
+  let h="<div class='tier-h'><span class='tt'>🔓 完整版解锁（再 +9 所）</span><span class='line'></span></div>";
+  h+="<div class='scard unlock'><div class='sname'>解锁后冲、稳、保各再加 3 所，共新增 9 所</div>"+
+  "<div class='srow'>当前给你的是：冲 "+M.chong.length+" 所（最多 5）、稳 "+M.wen.length+" 所、保 "+M.bao.length+" 所，每所带三句话；解锁后的 9 所同样带学校＋学院＋专业＋三句话。</div>"+
+  "<div class='price'><b>完整版 · 19.9 元</b><br><span class='small'>在小红书「完整版」商品下单后系统自动发货解锁码（UN- 开头）。一次买断，不是订阅；未输入解锁码前可全额退。</span></div>"+
+  "<input id='unlockInput' class='code-input' placeholder='UN-AB2K-9XQW' autocomplete='off' style='margin-top:12px'>"+
+  "<button class='btn main' id='unlockBtn' style='margin-top:12px'>解锁完整名单 →</button>"+
+  "<p class='small' id='unlockMsg' style='color:var(--pink-dk);margin-top:10px;min-height:18px'></p></div>";
   [["冲",M.chong.length],["稳",M.wen.length],["保",M.bao.length]].forEach(t=>{
     for(let i=1;i<=3;i++){
       h+="<div class='scard locked'><div class='sname'>🔒 "+t[0]+"档 · 解锁可见 第 "+(t[1]+i)+" 所</div>"+
@@ -858,19 +853,41 @@ function noQualHTML(){
   h+="<div class='card'><h3 style='text-align:center;margin-bottom:6px'>六维 bg 雷达（自我观察仍可用）</h3><div class='radar-wrap'>"+radarSVG(c.D)+"<div class='radar-tip' id='radarTip'>点维度名看来源</div></div></div>";
   h+="<div class='king'>「改得动的，都来得及。」</div>";
   h+="<div class='foot'><button class='btn ghost' id='redoBtn'>🔄 重新测试</button>"+
-  "<p class='small' style='margin-top:10px'>原创趣味设定，仅供娱乐与自我观察</p></div>";
+  "<p class='small' style='margin-top:10px'>原创设定，仅供自我评估参考</p></div>";
   return h;
 }
 function bindResult(){
   const rt=$("radarTip");
   document.querySelectorAll(".axis").forEach(a=>a.addEventListener("click",()=>{if(rt)rt.textContent=AXIS_INFO[a.dataset.axis];}));
   const rb=$("redoBtn");if(rb)rb.onclick=redo;
+  const ub=$("unlockBtn");
+  if(ub)ub.onclick=()=>{
+    const v=($("unlockInput").value||"").trim();
+    if(!v){$("unlockMsg").textContent="先输入解锁码（UN- 开头）。";return;}
+    if(UNLOCK_HASHES.includes(codeHash(v))){
+      try{localStorage.setItem("byby_unlock","1");}catch(e){}
+      renderResult();
+    }else{
+      $("unlockMsg").textContent="解锁码不对：核对 UN-XXXX-XXXX 格式，或联系卖家。";
+    }
+  };
 }
 function redo(){
   S={a:{},idx:0};show(0);
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
   $("quiz").classList.add("on");window.scrollTo(0,0);
 }
+$("codeBtn").onclick=()=>{
+  const v=$("codeInput").value.trim();
+  if(!v){$("codeMsg").textContent="先输入激活码。";return;}
+  if(CODE_HASHES.includes(codeHash(v))){
+    try{localStorage.setItem("byby_ok","1");}catch(e){}
+    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
+    $("home").classList.add("on");window.scrollTo(0,0);
+  }else{
+    $("codeMsg").textContent="激活码不对：核对格式 BY-XXXX-XXXX（区分大小写会自动转大写），或联系卖家。";
+  }
+};
 $("startBtn").onclick=()=>{S={a:{},idx:0};
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
   $("quiz").classList.add("on");show(0);window.scrollTo(0,0);};
