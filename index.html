@@ -574,6 +574,20 @@ function citeFor(key){
 function match(){
   const c=compute();const ch=chips();
   const pct=userPct();
+  const stName=(S.a.schooltext||"").trim();
+  const ALIAS={"哈工大":"哈尔滨工业大学","中科大":"中国科学技术大学","电子科大":"电子科技大学","华科":"华中科技大学","西交":"西安交通大学","国科大":"中国科学院大学","华南理工":"华南理工大学","北师大":"北京师范大学","南科大":"南方科技大学","杭电":"杭州电子科技大学"};
+  let selfDiff=null;
+  function isSelf(e){
+    if(!stName)return false;
+    const canon=ALIAS[stName]||stName;
+    return e.s===canon||e.s.indexOf(canon)===0||canon.indexOf(e.s)===0;
+  }
+  if(stName){
+    const canon=ALIAS[stName]||stName;
+    const hits=LIB.filter(e=>isSelf(e));
+    if(hits.length)selfDiff=Math.max.apply(null,hits.map(e=>e.d));
+    else selfDiff={a:76,b:64,c:58,d:48,e:40}[eff(1)]||null;
+  }
   const unlocked=(function(){try{return localStorage.getItem("byby_unlock")==="1";}catch(e){return false;}})();
   const SIB={cs:["se","other","comm"],se:["cs","other"],ee:["comm","cs","other"],comm:["ee","cs"],auto:["me","pe","cs","other"],me:["auto","pe","other"],pe:["auto","me","ee"],bme:["cs","ee","other"],other:["cs","auto","me","pe","ee","comm"]};
   const basePool=LIB.filter(e=>{
@@ -599,11 +613,25 @@ function match(){
         if(usedE.has(e))continue;
         if(taken.some(t=>t.e===e))continue;
         if((usedCnt[e.s]||0)>=2)continue;
+        if(mode!=="bao"&&isSelf(e))continue;
+        if((mode==="chong"||mode==="wen")&&selfDiff!==null&&e.d<selfDiff+3)continue;
         if(!missOK(e,mode,loose))continue;
         if(dedupeSchool&&taken.some(t=>t.e.s===e.s))continue;
         taken.push(x);
         usedE.add(e);
         usedCnt[e.s]=(usedCnt[e.s]||0)+1;
+      }
+    }
+    if(mode==="bao"&&stName&&(selfDiff===null||c.T>=selfDiff-8)){
+      const selfCands=basePool.filter(e=>isSelf(e)&&!usedE.has(e)&&(usedCnt[e.s]||0)<2&&missOK(e,mode,true))
+        .map(e=>({e,f:fit(e,ch,c)}))
+        .sort((a,b)=>(b.f-a.f)||(Math.abs(a.e.d-tgt)-Math.abs(b.e.d-tgt)));
+      let selfN=0;
+      for(const x of selfCands){
+        if(taken.length>=n||selfN>=2)break;
+        if(taken.some(t=>t.e===x.e))continue;
+        taken.push(x);selfN++;
+        usedE.add(x.e);usedCnt[x.e.s]=(usedCnt[x.e.s]||0)+1;
       }
     }
     for(const pad of [0,6,12,20]){
@@ -693,6 +721,7 @@ function buildQuiz(){
       q.o.forEach(o=>{html+="<button class='opt' data-q='"+q.id+"' data-k='"+o[0]+"'>"+o[1]+"</button>";});
       html+="</div>";
     }
+    if(q.id===1){html+="<div id='schoolInputWrap' style='display:none;margin-top:4px'><div class='st' style='font-size:12.5px;color:var(--ink2)'>你的本科院校名称（选填，写了推荐更准：你的学校不会出现在冲/稳里）</div><input id='schoolInput' class='code-input' style='letter-spacing:0;text-transform:none;font-size:14px;padding:10px 12px' autocomplete='off' placeholder='如：杭州电子科技大学'></div>";}
     if(q.id===2){html+="<div id='majorInputWrap' style='display:none;margin-top:4px'><div class='st' style='font-size:12.5px;color:var(--ink2)'>你的专业名称（选填，写了推荐更准）</div><input id='majorInput' class='code-input' style='letter-spacing:0;text-transform:none;font-size:14px;padding:10px 12px' placeholder='如：机器人工程'></div>";}
     if(q.id===12){html+="<div id='compInputWrap' style='display:none;margin-top:4px'><div class='st' style='font-size:12.5px;color:var(--ink2)'>具体赛事名称（选填，多个用、分隔）</div><input id='compInput' class='code-input' style='letter-spacing:0;text-transform:none;font-size:14px;padding:10px 12px' placeholder='如：蓝桥杯、ICPC 区域赛'></div>";}
     if(q.id===16){
@@ -706,6 +735,7 @@ function buildQuiz(){
       "<button class='btn main' data-nav='next'>"+(qi===QUESTIONS.length-1?"生成定位 →":"下一题 →")+"</button></div>";
     d.innerHTML=html;st.appendChild(d);
   });
+  const si=st.querySelector("#schoolInput");if(si)si.addEventListener("input",e=>{S.a.schooltext=e.target.value;});
   const mi=st.querySelector("#majorInput");if(mi)mi.addEventListener("input",e=>{S.a.majortext=e.target.value;});
   ["cet4","cet6","ielts","toefl"].forEach(k=>{const el=st.querySelector("#engin_"+k);if(el)el.addEventListener("input",e=>{S.a.engScore=S.a.engScore||{};S.a.engScore[k]=e.target.value;});});
   const ci=st.querySelector("#compInput");if(ci)ci.addEventListener("input",e=>{S.a.competext=e.target.value;});
@@ -734,6 +764,7 @@ function paintSlide(qi){
     const aid=b.dataset.aid;
     b.classList.toggle("sel",S.a[q.id]===(aid==="unsure"?"__unsure":"__skip"));
   });
+  if(q.id===1){const w=d.querySelector("#schoolInputWrap");if(w)w.style.display=S.a[1]?"block":"none";}
   if(q.id===2){const w=d.querySelector("#majorInputWrap");if(w)w.style.display=(S.a[2]==="ot")?"block":"none";}
   if(q.id===12){const w=d.querySelector("#compInputWrap");if(w){const a12=S.a[12];const show=Array.isArray(a12)?!a12.includes("none"):(a12&&a12!=="none"&&a12!=="__unsure"&&a12!=="__skip");w.style.display=show?"block":"none";}}
   if(q.id===7){const et=S.a.engTypes||[];
@@ -872,7 +903,7 @@ function renderResult(){
   bindResult();
 }
 function decodeText(c){
-  const lv=eff(1)?optLabel(1,eff(1)):"（未填层次）";
+  const lv=(S.a.schooltext?S.a.schooltext.trim()+"（":"")+(eff(1)?optLabel(1,eff(1)):"（未填层次）")+(S.a.schooltext?"）":"");
   const dn=optLabel(2,c.dir)+(c.dir==="other"&&S.a.majortext?"（"+S.a.majortext.trim()+"）":"");
   const rk=eff(5)?optLabel(5,eff(5)):"（未填排名）";
   let p1="你现在的位置："+lv+"读"+dn+"，排名"+rk+"。"+(S.a.competext?"（赛事："+S.a.competext.trim()+"）":"");
@@ -1003,14 +1034,14 @@ function bindResult(){
 }
 function redo(){
   S={a:{},idx:0};
-  const mi=$("majorInput"),ci=$("compInput");if(mi)mi.value="";if(ci)ci.value="";
+  const si=$("schoolInput"),mi=$("majorInput"),ci=$("compInput");if(si)si.value="";if(mi)mi.value="";if(ci)ci.value="";
   ["cet4","cet6","ielts","toefl"].forEach(k=>{const el=$("engin_"+k);if(el)el.value="";});
   show(0);
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
   $("quiz").classList.add("on");window.scrollTo(0,0);
 }
 $("startBtn").onclick=()=>{S={a:{},idx:0};
-  const mi=$("majorInput"),ci=$("compInput");if(mi)mi.value="";if(ci)ci.value="";
+  const si=$("schoolInput"),mi=$("majorInput"),ci=$("compInput");if(si)si.value="";if(mi)mi.value="";if(ci)ci.value="";
   ["cet4","cet6","ielts","toefl"].forEach(k=>{const el=$("engin_"+k);if(el)el.value="";});
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
   $("quiz").classList.add("on");show(0);window.scrollTo(0,0);};
